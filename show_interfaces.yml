@@ -1,6 +1,9 @@
 ---
-- name: Run tasks on specified hosts in AWX
+- name: Show all interfaces on Junos devices via AWX
+  hosts: junos_devices
   gather_facts: no
+  collections:
+    - juniper.device
   tasks:
     - name: Retrieve all interfaces from Junos device
       juniper.device.rpc:
