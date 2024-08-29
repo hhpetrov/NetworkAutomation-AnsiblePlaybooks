@@ -1,0 +1,18 @@
+---
+- name: Show all interfaces on Junos devices via AWX
+  hosts: junos_devices
+  gather_facts: no
+  collections:
+    - juniper.device
+  tasks:
+    - name: Retrieve all interfaces from Junos device
+      juniper.device.rpc:
+        rpc: get-interface-information
+        args:
+          interface-name: all
+          terse: true
+      register: interfaces_output
+
+    - name: Print interfaces
+      debug:
+        var: interfaces_output
