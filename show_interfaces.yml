@@ -1,6 +1,7 @@
 ---
 - name: Show all interfaces on Junos devices
   hosts: junos_devices, 192.168.68.157
+  connection: local
   gather_facts: no
   collections:
     - juniper.device
