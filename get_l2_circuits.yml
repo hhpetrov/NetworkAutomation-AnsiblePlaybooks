@@ -1,0 +1,17 @@
+---
+- name: Retrieve Layer 2 Circuits from Junos Devices
+  hosts: junos_devices, 192.168.68.157
+  gather_facts: no
+  collections:
+    - juniper.device
+  tasks:
+    - name: Retrieve L2 Circuit Information
+      juniper.device.rpc:
+        rpc: get-l2circuit-information
+        args:
+          terse: true
+      register: l2circuit_output
+
+    - name: Print L2 Circuit Information
+      debug:
+        var: l2circuit_output
