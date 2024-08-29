@@ -1,0 +1,14 @@
+---
+- name: Show Juniper Interfaces
+  hosts: juniper
+  gather_facts: no
+  tasks:
+    - name: Show Interfaces
+      junos_command:
+        commands:
+          - show interfaces
+      register: result
+
+    - name: Print Interfaces
+      debug:
+        msg: "{{ result.stdout }}"
