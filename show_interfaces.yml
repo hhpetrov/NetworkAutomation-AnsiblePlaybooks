@@ -1,5 +1,5 @@
 ---
-- name: Show all interfaces on Junos devices via AWX
+- name: Show all interfaces on Junos devices
   hosts: junos_devices, 192.168.68.157
   gather_facts: no
   collections:
