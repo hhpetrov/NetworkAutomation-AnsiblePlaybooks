@@ -4,7 +4,7 @@
   connection: local
   gather_facts: no
   collections:
-    - juniper.device
+    - juniper.device.junos_rpc:
   tasks:
     - name: Retrieve all interfaces from Junos device
       juniper.device.rpc:
