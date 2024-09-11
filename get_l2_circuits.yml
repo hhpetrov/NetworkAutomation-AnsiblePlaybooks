@@ -2,6 +2,7 @@
 - name: Retrieve Layer 2 Circuits from Junos Devices
   hosts: junos_devices, 192.168.68.157
   gather_facts: no
+  connection: local
   collections:
     - juniper.device
   tasks:
