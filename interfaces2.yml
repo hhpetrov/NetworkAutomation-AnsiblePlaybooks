@@ -1,0 +1,15 @@
+---
+- name: Retrieve interface information from Junos device
+  hosts: junos_devices
+  gather_facts: no
+
+  tasks:
+    - name: Gather interface facts
+      junipernetworks.junos.junos_facts:
+        gather_subset:
+          - interfaces
+      register: interface_facts
+
+    - name: Display the gathered facts
+      ansible.builtin.debug:
+        var: interface_facts
