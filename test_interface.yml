@@ -2,7 +2,7 @@
 - name: Retrieve interfaces from Junos device
   hosts: junos_devices
   gather_facts: no
-  connection: ssh
+  connection: local
 
   tasks:
     - name: Get interface information
