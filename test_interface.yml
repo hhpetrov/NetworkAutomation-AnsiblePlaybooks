@@ -1,0 +1,17 @@
+---
+- name: Retrieve interfaces from Junos device
+  hosts: junos_devices
+  gather_facts: no
+  connection: ssh
+
+  tasks:
+    - name: Get interface information
+      junipernetworks.junos.junos_rpc:
+        rpc: get-interface-information
+        arguments:
+          terse: true
+      register: command_output
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        var: command_output
