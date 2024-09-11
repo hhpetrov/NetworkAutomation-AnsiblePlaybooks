@@ -6,13 +6,8 @@
   collections:
     - juniper.device
   tasks:
-    - name: Retrieve L2 Circuit Information
       juniper.device.rpc:
-        rpc: get-l2circuit-information
-        args:
-          terse: true
-      register: l2circuit_output
-
-    - name: Print L2 Circuit Information
-      debug:
-        var: l2circuit_output
+    - name: Gather interface facts
+    - name: get system information
+        junipernetworks.junos.junos_rpc:
+        rpc: get-system-information
