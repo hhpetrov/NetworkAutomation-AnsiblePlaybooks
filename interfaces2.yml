@@ -2,6 +2,7 @@
 - name: Retrieve interface information from Junos device
   hosts: junos_devices
   gather_facts: no
+  connection: local
 
   tasks:
     - name: Gather interface facts
