@@ -1,0 +1,16 @@
+---
+- name: Test Junos device connectivity
+  hosts: junos_devices
+  gather_facts: no
+  connection: netconf
+
+  tasks:
+    - name: Ping test
+      junipernetworks.junos.junos_command:
+        commands:
+          - show version
+      register: ping_test
+
+    - name: Display the ping test result
+      ansible.builtin.debug:
+        var: ping_test.stdout_lines
