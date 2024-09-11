@@ -1,6 +1,6 @@
 ---
 - name: Retrieve interfaces from Junos device
-  hosts: juniper, junos_devices
+  hosts: junos_devices
   gather_facts: no
   connection: local
 
