@@ -1,19 +1,16 @@
 ---
-- name: Show all interfaces on Junos devices
-  hosts: junos_devices, 192.168.68.157
-  connection: local
+- name: Retrieve interfaces from Junos device
+  hosts: juniper, junos_devices
   gather_facts: no
-  collections:
-    - juniper.device
-  tasks:
-    - name: Retrieve all interfaces from Junos device
-      juniper.device.rpc:
-        rpc: get-interface-information
-        args:
-          interface-name: all
-          terse: true
-      register: interfaces_output
+  connection: local
 
-    - name: Print interfaces
-      debug:
-        var: interfaces_output
+  tasks:
+    - name: Run 'show interfaces terse' command
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces terse
+      register: command_output
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        var: command_output.stdout_lines
