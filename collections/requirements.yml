@@ -4,4 +4,6 @@ collections:
   - name: junipernetworks.junos
     src: https://github.com/Juniper/ansible-junos-stdlib.git
     version: "2.0.0"  
-  -name: junipernetworks.junos
+  - name: junos-eznc
+  - name: jxmlease
+  - name: xmltodict
