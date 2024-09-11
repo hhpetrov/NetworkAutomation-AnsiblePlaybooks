@@ -1,0 +1,10 @@
+- name: Test Python Execution
+  hosts: junos_devices
+  tasks:
+    - name: Print Python Version
+      command: python3 --version
+      register: result
+
+    - name: Display Python Version
+      debug:
+        msg: "Python Version: {{ result.stdout }}"
