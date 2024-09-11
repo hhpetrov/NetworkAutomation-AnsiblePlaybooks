@@ -2,3 +2,4 @@
 collections:
   - name: juniper.device
   - name: junipernetworks.junos
+  - name: jsnappy
