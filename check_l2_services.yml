@@ -1,0 +1,16 @@
+---
+- name: Check and display all L2 circuit services on a device
+  hosts: "{{ inventory_hostname }}"  # Dynamic inventory hostname
+  gather_facts: no
+  connection: local
+
+  tasks:
+    - name: Run command to get L2 circuit services
+      junipernetworks.junos.junos_command:
+        commands:
+          - show l2circuit services
+      register: l2circuit_output
+
+    - name: Display L2 circuit services output
+      ansible.builtin.debug:
+        var: l2circuit_output.stdout_lines
