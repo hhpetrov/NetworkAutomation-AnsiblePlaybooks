@@ -1,0 +1,19 @@
+---
+- name: Show configuration for a specific interface on a device
+  hosts: "{{ inventory_hostname }}"  # Target device specified by inventory_hostname
+  gather_facts: no
+  connection: local
+
+  vars:
+    interface_name: "{{ interface_name }}"  # Name of the interface to be queried
+
+  tasks:
+    - name: Run command to show configuration of the specified interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show configuration interfaces {{ interface_name }}
+      register: interface_config_output
+
+    - name: Display the interface configuration output
+      ansible.builtin.debug:
+        var: interface_config_output.stdout_lines
