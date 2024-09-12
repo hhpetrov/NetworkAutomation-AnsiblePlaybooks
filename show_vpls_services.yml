@@ -1,0 +1,16 @@
+---
+- name: Check and display all VPLS services on a device
+  hosts: "{{ inventory_hostname }}"  # Dynamic inventory hostname
+  gather_facts: no
+  connection: local
+
+  tasks:
+    - name: Run command to get VPLS services
+      junipernetworks.junos.junos_command:
+        commands:
+          - show vpls connections
+      register: vpls_output
+
+    - name: Display VPLS services output
+      ansible.builtin.debug:
+        var: vpls_output.stdout_lines
