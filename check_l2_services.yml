@@ -8,7 +8,7 @@
     - name: Run command to get L2 circuit services
       junipernetworks.junos.junos_command:
         commands:
-          - show l2circuit services
+          - show l2circuit connections
       register: l2circuit_output
 
     - name: Display L2 circuit services output
