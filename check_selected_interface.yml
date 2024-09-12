@@ -8,10 +8,10 @@
     interface_name: "{{ interface_name }}"
 
   tasks:
-    - name: Run 'show interfaces terse' command for specific interface
+    - name: Run 'show interfaces terse' command for a specific interface
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces terse | match "{{ interface_name }}"
+          - show interfaces terse {{ interface_name }}
       register: command_output
 
     - name: Display the command output
