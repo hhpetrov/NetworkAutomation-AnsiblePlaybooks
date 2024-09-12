@@ -1,0 +1,36 @@
+---
+- name: Retrieve specific interface from a Junos device
+  hosts: "{{ inventory_hostname }}"  # This ensures the specific host passed by AWX is used.
+  gather_facts: no
+  connection: local
+
+  vars:
+    interface_name: "{{ interface_name }}"  # Accept the interface name as a parameter
+    valid_interfaces:
+      - ge-0/0/0
+      - ge-0/0/1
+      - ge-0/0/2
+      - xe-0/0/0
+    interface_pattern: "^ge-[0-9]/[0-9]/[0-9]$|^xe-[0-9]/[0-9]/[0-9]$"  # Example regex for 'ge-' or 'xe-' interfaces
+
+  tasks:
+    - name: Validate if the interface is in the list of valid interfaces
+      fail:
+        msg: "Invalid interface name: {{ interface_name }}. Please choose from {{ valid_interfaces }}"
+      when: interface_name not in valid_interfaces
+
+    # Option 2: Use regex validation (uncomment if you prefer regex over the list)
+    # - name: Validate if the interface matches the expected pattern
+    #   fail:
+    #     msg: "Invalid interface format: {{ interface_name }}. Expected format: 'ge-X/X/X' or 'xe-X/X/X'"
+    #   when: interface_name is not match(interface_pattern)
+
+    - name: Run 'show interfaces terse' command for a specific interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces terse {{ interface_name }}
+      register: command_output
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        var: command_output.stdout_lines
