@@ -1,0 +1,18 @@
+---
+- name: Ping a specific IP from a target device
+  hosts: "{{ inventory_hostname }}"  # Target device specified by inventory_hostname
+  gather_facts: no
+  connection: local  # Assuming you want to run the ping command locally on the target device
+
+  vars:
+    target_ip: "{{ target_ip }}"  # IP address to be pinged
+
+  tasks:
+    - name: Ping the target IP address
+      ansible.builtin.ping:
+        data: "{{ target_ip }}"  # Use data key to specify the IP address
+      register: ping_result
+
+    - name: Display the ping result
+      ansible.builtin.debug:
+        var: ping_result
