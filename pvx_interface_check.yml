@@ -1,0 +1,23 @@
+---
+- name: Check interface status on Juniper BTI7060 using Telnet
+  hosts: juniper_bti  # Define your BTI7060 devices in the inventory
+  gather_facts: no
+  connection: local  # Connection is managed via Telnet through the expect module
+
+  tasks:
+    - name: Telnet to BTI7060 and retrieve interface status
+      ansible.builtin.expect:
+        command: "telnet {{ inventory_hostname }} 3084"
+        responses:
+          "Username:": "{{ ansible_user }}"  # AWX will inject this via credentials
+          "Password:": "{{ ansible_password }}"  # AWX will inject this via credentials
+        timeout: 30
+        # Once logged in, send the command to get interface status
+        prompt: ">"
+        responses:
+          ">": "show interface all\n"
+      register: telnet_output
+
+    - name: Display interface status
+      ansible.builtin.debug:
+        var: telnet_output.stdout_lines
