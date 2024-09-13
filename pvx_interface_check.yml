@@ -12,7 +12,9 @@
           "Username:": "{{ ansible_user }}"  # AWX will inject this via credentials
           "Password:": "{{ ansible_password }}"  # AWX will inject this via credentials
           ">": "show interfaces brief\n"
-        timeout: 30
+          # Handle pagination if needed (use the correct prompt if device uses '--More--' or similar)
+          "--More--": " "  # Sending space to go to the next page
+        timeout: 90  # Increased timeout to ensure larger output is captured
         echo: true  # Set this to true if you want to see command output during execution
       register: telnet_output
 
