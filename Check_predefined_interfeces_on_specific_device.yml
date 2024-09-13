@@ -28,7 +28,7 @@
     - name: Run 'show interfaces terse' command for a specific interface
       junipernetworks.junos.junos_command:
         commands:
-          - show configuration interfaces terse {{ interface_name }}
+          - show configuration interfaces {{ interface_name }}
       register: command_output
 
     - name: Display the command output
