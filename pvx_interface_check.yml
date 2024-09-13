@@ -11,9 +11,11 @@
         responses:
           "Username:": "{{ ansible_user }}"  # AWX will inject this via credentials
           "Password:": "{{ ansible_password }}"  # AWX will inject this via credentials
-          ">": "show interface all\n"
         timeout: 30
-        echo: false  # Set this to true if you want to see command output during execution
+        # Once logged in, send the command to get interface status
+        prompt: ">"
+        responses:
+          ">": "show interface all\n"
       register: telnet_output
 
     - name: Display interface status
