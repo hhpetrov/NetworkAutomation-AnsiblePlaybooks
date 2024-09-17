@@ -1,0 +1,23 @@
+---
+- name: Retrieve specific interface from a Junos device
+  hosts: all  # Use 'all' to target multiple devices in the inventory
+  gather_facts: no
+  connection: local
+
+  tasks:
+    - name: Check if the device is in the map
+      ansible.builtin.set_fact:
+        interface_name: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
+
+    - name: Run 'show interfaces terse' command for the specific interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces terse {{ interface_name }}
+      register: command_output
+      when: interface_name is defined
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        var: command_output.stdout_lines
+      when: interface_name is defined
