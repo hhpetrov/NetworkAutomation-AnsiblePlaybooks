@@ -52,9 +52,9 @@
       when: inventory_hostname in device_interface_map
 
     - name: Run commands for each interface separately
-      loop: "{{ interface_info_list }}"
       vars:
         interface_info: "{{ item }}"
+      loop: "{{ interface_info_list }}"
       tasks:
         - name: Run commands on interface {{ interface_info.interface }}
           junipernetworks.junos.junos_command:
