@@ -29,36 +29,35 @@
       ansible.builtin.debug:
         msg: "Device: {{ device_hostname }}"
 
-    - name: Display device interface map
-      ansible.builtin.debug:
-        msg: "Device interface map: {{ device_interface_map }}"
-
-    - name: Display ansible_host
-      ansible.builtin.debug:
-        msg: "Ansible host: {{ ansible_host }}"
-
     - name: Check if the device is in the map
       ansible.builtin.set_fact:
-        interface_name: "{{ device_interface_map[ansible_host] }}"
-      when: ansible_host in device_interface_map
+        interface_name: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
+
+    - name: Run 'show interfaces' command for the specific interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces
+      register: show_interfaces_output
+      when: interface_name is defined
 
     - name: Run 'show interfaces terse' command for the specific interface
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces terse {{ interface_name }}
-      register: command_output
+          - show interfaces terse
+      register: show_interfaces_terse_output
       when: interface_name is defined
 
-    - name: Flatten command output to a list of strings
-      set_fact:
-        flattened_output: "{{ command_output.stdout_lines | map('flatten') | list | join('\n') }}"
-      when: command_output.stdout_lines is defined
-
-    - name: Display formatted command output with proper newlines
+    - name: Display the output of 'show interfaces'
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          Interface: {{ interface_name }}
-          Output:
-          {{ flattened_output if command_output.stdout_lines is defined else 'No output' }}
-      when: interface_name is defined
+          Show Interfaces:
+          {{ show_interfaces_output.stdout_lines | join('\n') if show_interfaces_output.stdout_lines is defined else 'No output' }}
+
+    - name: Display the output of 'show interfaces terse'
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ device_hostname }}
+          Show Interfaces Terse:
+          {{ show_interfaces_terse_output.stdout_lines | join('\n') if show_interfaces_terse_output.stdout_lines is defined else 'No output' }}
