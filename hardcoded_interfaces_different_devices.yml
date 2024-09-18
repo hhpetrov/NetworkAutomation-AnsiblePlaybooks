@@ -1,0 +1,46 @@
+---
+- name: Retrieve specific interface from a Junos device and display device name
+  hosts: all
+  gather_facts: no
+  connection: local
+
+  vars:
+    device_interface_map:
+      "192.168.68.152": "ae1"
+      "192.168.68.157": "ge-0/0/1"
+
+  tasks:
+    - name: Retrieve device hostname
+      junipernetworks.junos.junos_command:
+        commands:
+          - show version | match Hostname
+      register: device_info
+
+    - name: Extract the device hostname
+      ansible.builtin.set_fact:
+        device_hostname: "{{ device_info.stdout_lines[0].split(':')[-1] | trim }}"
+
+    - name: Display the device hostname
+      ansible.builtin.debug:
+        msg: "Device: {{ device_hostname }}"
+
+    - name: Check if the device is in the map
+      ansible.builtin.set_fact:
+        interface_name: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
+
+    - name: Run 'show interfaces terse' command for the specific interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces terse {{ interface_name }}
+      register: command_output
+      when: interface_name is defined
+
+    - name: Display formatted command output with device name
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ device_hostname }}
+          Interface: {{ interface_name }}
+          Output:
+          {{ command_output.stdout_lines | join('\n') }}
+      when: interface_name is defined
