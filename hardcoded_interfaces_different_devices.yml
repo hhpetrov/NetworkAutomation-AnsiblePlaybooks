@@ -52,9 +52,8 @@
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          {% for command, output in command_outputs.stdout_lines.items() %}
-          Command: {{ command }}
+          {% for command_output in command_outputs.stdout_lines %}
           Output:
-          {{ output | join('\n') if output is defined else 'No output' }}
+          {{ command_output | join('\n') if command_output is defined else 'No output' }}
           {% endfor %}
       when: command_outputs is defined
