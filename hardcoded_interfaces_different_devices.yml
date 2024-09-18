@@ -24,7 +24,7 @@
         - interface: "lt-1/1/0.105"
           commands:
             - show interfaces lt-1/1/0.105
-            - show interfaces terse lt-1/1/0.105
+            - show interfaces terse lt-1/1/0.105"
 
   tasks:
     - name: Display inventory hostname
@@ -55,25 +55,28 @@
       ansible.builtin.set_fact:
         aggregated_outputs: {}
 
-    - name: Run commands for each interface and aggregate results
+    - name: Run commands for each interface
       loop: "{{ interface_info_list }}"
       vars:
         interface_info: "{{ item }}"
       junipernetworks.junos.junos_command:
         commands: "{{ interface_info.commands }}"
       register: command_outputs
-      tasks:
-        - name: Aggregate command outputs
-          ansible.builtin.set_fact:
-            aggregated_outputs: >-
-              {{
-                aggregated_outputs | combine({
-                  device_hostname: {
-                    (interface_info.interface + '_show_interfaces'): (command_outputs.results[0].stdout_lines | join('\n')),
-                    (interface_info.interface + '_show_interfaces_terse'): (command_outputs.results[1].stdout_lines | join('\n'))
-                  }
-                })
-              }}
+
+    - name: Aggregate command outputs
+      ansible.builtin.set_fact:
+        aggregated_outputs: >-
+          {{
+            aggregated_outputs | combine({
+              device_hostname: {
+                (item.interface + '_show_interfaces'): (command_outputs.results[0].stdout_lines | join('\n')),
+                (item.interface + '_show_interfaces_terse'): (command_outputs.results[1].stdout_lines | join('\n'))
+              }
+            })
+          }}
+      loop: "{{ interface_info_list }}"
+      vars:
+        item: "{{ item }}"
 
     - name: Display aggregated outputs by device
       ansible.builtin.debug:
