@@ -141,18 +141,18 @@
                 })
               }}
 
-        - name: Display the command output for each command
-          loop: "{{ command_outputs.results }}"
-          debug:
-            var: item.stdout_lines
-
         - name: Combine temporary results into aggregated outputs
           set_fact:
             aggregated_outputs: >-
               {{
                 aggregated_outputs | default({}) |
-                combine(temp_results)
+                combine(temp_results | dict2items | map(attribute='value') | list | items2dict)
               }}
+
+        - name: Display the command output for each command
+          loop: "{{ command_outputs.results }}"
+          debug:
+            var: item.stdout_lines
 
     - name: Display aggregated outputs
       debug:
