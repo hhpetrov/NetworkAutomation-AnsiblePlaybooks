@@ -50,9 +50,9 @@
     - name: Run additional commands on found interfaces
       junipernetworks.junos.junos_command:
         commands:
-          - "{{ item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }}"
-          - "{{ item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }} terse"
-        with_items: "{{ filtered_output }}"
+          - "show interfaces {{ item }}"
+          - "show interfaces {{ item }} terse"
+        loop: "{{ interfaces }}"
         register: additional_commands_output
 
     - name: Display additional commands output
@@ -61,7 +61,7 @@
           Device: {{ inventory_hostname }}
           Additional Commands Output:
           {% for result in additional_commands_output.results %}
-            Interface: {{ result.item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }}
+            Interface: {{ result.item }}
             Command Output:
             {{ result.stdout_lines | join('\n') }}
           {% endfor %}
