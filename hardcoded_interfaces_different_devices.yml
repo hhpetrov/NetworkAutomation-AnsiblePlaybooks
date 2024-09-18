@@ -53,23 +53,26 @@
           commands:
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
+            
         - interface: "lt-0/0/0.303"
           commands:
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
+            
         - interface: "lt-0/0/0.304"
           commands:
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
+            
         - interface: "lt-1/0/0.303"
           commands:
             - show interfaces lt-1/0/0.303
-            - show interfaces terse lt-1/0/0.303           
-        - interface: "ge-0/0/9.303"
+            - show interfaces terse lt-1/0/0.303  
+            
+        - interface: "lt-1/0/0.304"
           commands:
             - show interfaces lt-1/0/0.304
-            - show interfaces terse lt-1/0/0.304         
-
+            - show interfaces terse lt-1/0/0.304
             
   tasks:
     - name: Display inventory hostname
