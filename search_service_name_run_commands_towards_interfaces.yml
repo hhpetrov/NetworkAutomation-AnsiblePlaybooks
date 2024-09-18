@@ -1,0 +1,54 @@
+---
+- name: Check VRF services and run commands on specific interfaces
+  hosts: localhost  # Runs locally as we are targeting remote devices via the connection
+  gather_facts: no
+
+  vars:
+    predefined_service_name: "YOUR_SERVICE_NAME"  # Replace with your specific service name
+    devices:
+      - "192.168.68.152"
+      - "192.168.68.157"
+
+  tasks:
+    - name: Retrieve VRF services for each device
+      junipernetworks.junos.junos_command:
+        commands:
+          - show configuration services
+      register: vrf_services
+      delegate_to: "{{ item }}"
+      with_items: "{{ devices }}"
+
+    - name: Validate the service name and extract service interfaces
+      set_fact:
+        service_interfaces: >-
+          {{
+            vrf_services.results | selectattr('stdout_lines', 'defined') | selectattr('stdout_lines', 'search', predefined_service_name) | map(attribute='stdout_lines') | list | first | regex_findall('interfaces\\s+([\\S]+)')
+          }}
+      when: vrf_services.results | length > 0 and vrf_services.results | selectattr('stdout_lines', 'search', predefined_service_name) | list | length > 0
+
+    - name: Fail if the service name is not found on any device
+      fail:
+        msg: "The predefined service name '{{ predefined_service_name }}' was not found on any device."
+      when: service_interfaces is not defined or service_interfaces | length == 0
+
+    - name: Display the interfaces associated with the service
+      ansible.builtin.debug:
+        msg: "Service {{ predefined_service_name }} has interfaces: {{ service_interfaces }}"
+
+    - name: Run commands on each interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - show interfaces {{ item }}
+      loop: "{{ service_interfaces }}"
+      register: command_output
+      when: service_interfaces is defined and service_interfaces | length > 0
+
+    - name: Display command outputs for each interface
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Interface: {{ item }}
+          Output:
+          {{ command_output.results[loop.index0].stdout_lines | join('\n') }}
+      loop: "{{ service_interfaces }}"
+      when: command_output.results | length > 0
