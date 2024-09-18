@@ -128,9 +128,17 @@
           debug:
             var: item.stdout_lines
 
-    - name: Aggregate results
-      set_fact:
-        aggregated_outputs: "{{ aggregated_outputs | default({}) | combine({{ device_hostname }}: {interface_info.interface: command_outputs.results}) }}"
+        - name: Aggregate results
+          set_fact:
+            aggregated_outputs: >-
+              {{
+                aggregated_outputs | default({}) |
+                combine({
+                  device_hostname: {
+                    interface_info.interface: command_outputs.results | map(attribute='stdout_lines') | list
+                  }
+                })
+              }}
 
     - name: Display aggregated outputs
       debug:
