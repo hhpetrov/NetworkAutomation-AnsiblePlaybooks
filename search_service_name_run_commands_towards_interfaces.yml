@@ -13,7 +13,7 @@
     - name: Retrieve VRF services for each device
       junipernetworks.junos.junos_command:
         commands:
-          - show configuration services
+          - show configuration routing-instances
       register: vrf_services
       delegate_to: "{{ item }}"
       with_items: "{{ devices }}"
