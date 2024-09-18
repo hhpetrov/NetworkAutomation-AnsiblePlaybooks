@@ -9,77 +9,94 @@
       "172.18.3.13":
         - interface: "ge-0/0/9.102"
           commands:
+            - show system information
             - show interfaces ge-0/0/9.102
             - show interfaces terse ge-0/0/9.102
       "172.18.1.40":
         - interface: "ge-0/0/9.102"
           commands:
+            - show system information
             - show interfaces ge-0/0/9.102
             - show interfaces terse ge-0/0/9.102
       "192.168.75.116":
         - interface: "lt-1/1/0.104"
           commands:
+            - show system information
             - show interfaces lt-1/1/0.104
             - show interfaces terse lt-1/1/0.104
         - interface: "lt-1/1/0.105"
           commands:
+            - show system information
             - show interfaces lt-1/1/0.105
             - show interfaces terse lt-1/1/0.105
       "192.168.75.110":
         - interface: "ae6.104"
           commands:
+            - show system information
             - show interfaces ae6.104
             - show interfaces terse ae6.104
       "172.18.24.32":
         - interface: "ge-0/0/9.303"
           commands:
+            - show system information
             - show interfaces ge-0/0/9.303
             - show interfaces terse ge-0/0/9.303  
       "172.18.24.33":
         - interface: "ge-0/0/9.303"
           commands:
+            - show system information
             - show interfaces ge-0/0/9.303
             - show interfaces terse ge-0/0/9.303
         - interface: "xe-0/0/38.103"
           commands:
+            - show system information
             - show interfaces xe-0/0/38.103
             - show interfaces terse xe-0/0/38.103
       "172.18.24.9":
         - interface: "lt-0/0/0.103"
           commands:
+            - show system information
             - show interfaces lt-0/0/0.103
             - show interfaces terse lt-0/0/0.103
-            
         - interface: "lt-0/0/0.104"
           commands:
+            - show system information
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
             
         - interface: "lt-0/0/0.303"
           commands:
+            - show system information
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
             
         - interface: "lt-0/0/0.304"
           commands:
+            - show system information
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
             
         - interface: "lt-1/0/0.303"
           commands:
+            - show system information
             - show interfaces lt-1/0/0.303
             - show interfaces terse lt-1/0/0.303  
             
         - interface: "lt-1/0/0.304"
           commands:
+            - show system information
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-
+            
   tasks:
+    - name: Display inventory hostname
+      ansible.builtin.debug:
+        msg: "Inventory hostname: {{ inventory_hostname }}"
+
     - name: Retrieve device hostname
       junipernetworks.junos.junos_command:
         commands:
-          - show version | match Hostname
+          - show system information
       register: device_info
 
     - name: Extract the device hostname from the output
@@ -87,32 +104,25 @@
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
-    - name: Run commands for each interface and display results
-      loop: "{{ device_interface_map[inventory_hostname] }}"
-      loop_control:
-        loop_var: interface_item
-      junipernetworks.junos.junos_command:
-        commands: "{{ interface_item.commands }}"
-      register: command_outputs
-
-    - name: Display the results for each interface
+    - name: Display the device hostname
       ansible.builtin.debug:
-        msg: |
-          ok: [{{ inventory_hostname }}] - Device Name: {{ device_hostname }} - Interface: {{ interface_item.interface }}
-          Show Interfaces Output:
-          {% if command_outputs.results[0].stdout_lines %}
-            {{ command_outputs.results[0].stdout_lines | join(' ') }}
-          {% else %}
-            No output for 'show interfaces'
-          {% endif %}
-          
-          Show Interfaces Terse Output:
-          {% if command_outputs.results[1].stdout_lines %}
-            {{ command_outputs.results[1].stdout_lines | join(' ') }}
-          {% else %}
-            No output for 'show interfaces terse'
-          {% endif %}
-      loop: "{{ device_interface_map[inventory_hostname] }}"
-      loop_control:
-        loop_var: interface_item
-      when: command_outputs is defined
+        msg: "Device: {{ device_hostname }}"
+
+    - name: Check if the device is in the map
+      ansible.builtin.set_fact:
+        interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
+
+    - name: Initialize aggregated outputs
+      ansible.builtin.set_fact:
+        aggregated_outputs: {}
+
+    - name: Run commands for each interface and aggregate results
+      block:
+        - name: Run commands for each interface
+          loop: "{{ interface_info_list }}"
+          vars:
+            interface_info: "{{ item }}"
+          junipernetworks.junos.junos_command:
+            commands: "{{ interface_info.commands }}"
+          register: command_outputs
