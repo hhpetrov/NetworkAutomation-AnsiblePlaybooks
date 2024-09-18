@@ -1,0 +1,16 @@
+---
+- name: Retrieve interfaces from Junos device
+  hosts: 172.18.3.13, 172.18.1.40, 192.168.75.116, 172.,18.24.9
+  gather_facts: no
+  connection: local
+
+  tasks:
+    - name: Run 'show route table KT_EPS044293T.inet.0' command
+      junipernetworks.junos.junos_command:
+        commands:
+          - show route table KT_EPS044293T.inet.0
+      register: command_output
+
+    - name: Display the command output
+      ansible.builtin.debug:
+        var: command_output.stdout_lines
