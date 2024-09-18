@@ -32,6 +32,11 @@
           Filtered Command Output:
           {{ filtered_output | join('\n') }}
 
+    - name: Check if any interfaces were found
+      fail:
+        msg: "No interfaces found for the predefined service '{{ predefined_service_name }}'."
+      when: filtered_output | length == 0
+
     - name: Run additional commands for each found interface
       junipernetworks.junos.junos_command:
         commands:
