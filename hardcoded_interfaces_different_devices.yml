@@ -98,12 +98,12 @@
     - name: Run commands for each interface separately
       loop: "{{ interface_info_list }}"
       loop_control:
-        loop_var: interface_item  # Renamed loop variable to avoid conflict
-      vars:
-        interface_info: "{{ item }}"
+        loop_var: interface_item
       junipernetworks.junos.junos_command:
         commands: "{{ interface_item.commands }}"
       register: command_outputs
+      loop_control:
+        label: "{{ interface_item.interface }}"
 
     - name: Display raw output for each command
       ansible.builtin.debug:
@@ -112,15 +112,15 @@
           Interface: {{ interface_item.interface }}
           
           Show Interfaces:
-          {% if command_outputs.stdout_lines[0] is defined %}
-          {{ command_outputs.stdout_lines[0] | join(' ') }}
+          {% if command_outputs.results[0].stdout_lines is defined %}
+          {{ command_outputs.results[0].stdout_lines | join(' ') }}
           {% else %}
           No output for 'show interfaces {{ interface_item.interface }}'
           {% endif %}
           
           Show Interfaces Terse:
-          {% if command_outputs.stdout_lines[1] is defined %}
-          {{ command_outputs.stdout_lines[1] | join(' ') }}
+          {% if command_outputs.results[1].stdout_lines is defined %}
+          {{ command_outputs.results[1].stdout_lines | join(' ') }}
           {% else %}
           No output for 'show interfaces terse {{ interface_item.interface }}'
           {% endif %}
