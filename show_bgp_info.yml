@@ -1,0 +1,56 @@
+- name: Show BGP and System Information
+  hosts: 172.18.3.13,172.18.1.40,192.168.75.116,172.18.24.9
+  gather_facts: no
+  connection: local
+  tasks:
+    - name: Run show system information command
+      juniper.junos.junos_command:
+        commands:
+          - show system information
+      register: system_information
+
+    - name: Display System Information
+      debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Command: show system information
+          Output: {{ system_information.stdout[0] }}
+
+    - name: Run show bgp summary command
+      juniper.junos.junos_command:
+        commands:
+          - show bgp summary instance KT_EPS044293T
+      register: bgp_summary
+
+    - name: Display BGP Summary
+      debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Command: show bgp summary instance KT_EPS044293T
+          Output: {{ bgp_summary.stdout[0] }}
+
+    - name: Run show route summary command
+      juniper.junos.junos_command:
+        commands:
+          - show route summary table KT_EPS044293T.inet.0
+      register: route_summary
+
+    - name: Display Route Summary
+      debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Command: show route summary table KT_EPS044293T.inet.0
+          Output: {{ route_summary.stdout[0] }}
+
+    - name: Run show route table command
+      juniper.junos.junos_command:
+        commands:
+          - show route table KT_EPS044293T.inet.0
+      register: route_table
+
+    - name: Display Route Table
+      debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Command: show route table KT_EPS044293T.inet.0
+          Output: {{ route_table.stdout[0] }}
