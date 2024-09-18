@@ -2,6 +2,7 @@
 - name: Check VRF services and run commands on specific interfaces
   hosts: localhost  # Runs locally as we are targeting remote devices via the connection
   gather_facts: no
+  connection: local
 
   vars:
     predefined_service_name: "KT_EPS044293T"  # Replace with your specific service name
