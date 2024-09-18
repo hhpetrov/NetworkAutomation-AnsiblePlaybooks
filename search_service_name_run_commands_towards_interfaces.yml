@@ -38,24 +38,6 @@
     - name: Display extracted interfaces
       ansible.builtin.debug:
         msg: |
+          Device: {{ inventory_hostname }}
           Extracted Interfaces:
           {{ interfaces | join('\n') }}
-
-    - name: Run additional commands on found interfaces
-      junipernetworks.junos.junos_command:
-        commands:
-          - "show interfaces {{ item }}"
-          - "show interfaces {{ item }} terse"
-        loop: "{{ interfaces }}"
-        register: additional_commands_output
-
-    - name: Display additional commands output
-      ansible.builtin.debug:
-        msg: |
-          Device: {{ inventory_hostname }}
-          Additional Commands Output:
-          {% for result in additional_commands_output.results %}
-            Interface: {{ result.item }}
-            Command Output:
-            {{ result.stdout_lines | join('\n') }}
-          {% endfor %}
