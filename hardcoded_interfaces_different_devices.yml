@@ -24,7 +24,7 @@
         - interface: "lt-1/1/0.105"
           commands:
             - show interfaces lt-1/1/0.105
-            - show interfaces terse lt-1/1/0.105"
+            - show interfaces terse lt-1/1/0.105
 
   tasks:
     - name: Display inventory hostname
@@ -51,12 +51,12 @@
         interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
       when: inventory_hostname in device_interface_map
 
-    - name: Run commands for each interface and aggregate results
-      block:
-        - name: Run commands for each interface
-          loop: "{{ interface_info_list }}"
-          vars:
-            interface_info: "{{ item }}"
+    - name: Run commands for each interface separately
+      loop: "{{ interface_info_list }}"
+      vars:
+        interface_info: "{{ item }}"
+      tasks:
+        - name: Run commands on interface {{ interface_info.interface }}
           junipernetworks.junos.junos_command:
             commands: "{{ interface_info.commands }}"
           register: command_outputs
@@ -68,19 +68,15 @@
               Interface: {{ interface_info.interface }}
               
               Show Interfaces:
-              {% if command_outputs.results[0].stdout_lines is defined %}
-              {{ command_outputs.results[0].stdout_lines | join('\n') }}
+              {% if command_outputs.stdout_lines[0] is defined %}
+              {{ command_outputs.stdout_lines[0] | join(' ') }}
               {% else %}
               No output for 'show interfaces {{ interface_info.interface }}'
               {% endif %}
               
               Show Interfaces Terse:
-              {% if command_outputs.results[1].stdout_lines is defined %}
-              {{ command_outputs.results[1].stdout_lines | join('\n') }}
+              {% if command_outputs.stdout_lines[1] is defined %}
+              {{ command_outputs.stdout_lines[1] | join(' ') }}
               {% else %}
               No output for 'show interfaces terse {{ interface_info.interface }}'
               {% endif %}
-          loop: "{{ interface_info_list }}"
-          vars:
-            interface_info: "{{ item }}"
-            command_outputs: "{{ hostvars[inventory_hostname]['command_outputs'] }}"
