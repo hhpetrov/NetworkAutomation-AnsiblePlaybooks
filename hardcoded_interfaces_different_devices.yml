@@ -49,7 +49,6 @@
           commands:
             - show interfaces lt-0/0/0.103
             - show interfaces terse lt-0/0/0.103
-            
         - interface: "lt-0/0/0.104"
           commands:
             - show interfaces lt-0/0/0.104
@@ -74,8 +73,12 @@
           commands:
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-
+            
   tasks:
+    - name: Display inventory hostname
+      ansible.builtin.debug:
+        msg: "Inventory hostname: {{ inventory_hostname }}"
+
     - name: Retrieve device hostname
       junipernetworks.junos.junos_command:
         commands:
@@ -87,19 +90,25 @@
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
-    - name: Run commands for each interface
-      loop: "{{ device_interface_map[inventory_hostname] }}"
-      loop_control:
-        loop_var: interface_item
-      junipernetworks.junos.junos_command:
-        commands: "{{ interface_item.commands }}"
-      register: command_outputs
-
-    - name: Display the results for each interface
+    - name: Display the device hostname
       ansible.builtin.debug:
-        msg: |
-          ok: [{{ inventory_hostname }}] - {{ device_hostname }}: Interface {{ interface_item.interface }} - Show Interfaces Output: {{ command_outputs.results[0].stdout_lines | join(' ') }} - Show Interfaces Terse Output: {{ command_outputs.results[1].stdout_lines | join(' ') }}
-      loop: "{{ device_interface_map[inventory_hostname] }}"
-      loop_control:
-        loop_var: interface_item
-      when: command_outputs is defined and command_outputs.results | length > 0
+        msg: "Device: {{ device_hostname }}"
+
+    - name: Check if the device is in the map
+      ansible.builtin.set_fact:
+        interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
+
+    - name: Initialize aggregated outputs
+      ansible.builtin.set_fact:
+        aggregated_outputs: {}
+
+    - name: Run commands for each interface and aggregate results
+      block:
+        - name: Run commands for each interface
+          loop: "{{ interface_info_list }}"
+          vars:
+            interface_info: "{{ item }}"
+          junipernetworks.junos.junos_command:
+            commands: "{{ interface_info.commands }}"
+          register: command_outputs
