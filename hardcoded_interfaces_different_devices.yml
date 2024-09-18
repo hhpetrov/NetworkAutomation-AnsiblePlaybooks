@@ -22,7 +22,7 @@
 
     - name: Extract the device hostname from the output
       ansible.builtin.set_fact:
-        device_hostname: "{{ device_info.stdout_lines[0].split(':')[-1] | trim }}"
+        device_hostname: "{{ device_info.stdout_lines[0] | select('search', 'Hostname:') | list | first | split(':')[-1] | trim }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
     - name: Display the device hostname
