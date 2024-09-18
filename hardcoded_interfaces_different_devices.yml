@@ -96,33 +96,31 @@
       when: inventory_hostname in device_interface_map
 
     - name: Run commands for each interface separately
-      vars:
-        interface_info: "{{ item }}"
       loop: "{{ interface_info_list }}"
       loop_control:
         loop_var: interface_item  # Renamed loop variable to avoid conflict
-      tasks:
-        - name: Run commands on interface {{ interface_item.interface }}
-          junipernetworks.junos.junos_command:
-            commands: "{{ interface_item.commands }}"
-          register: command_outputs
+      vars:
+        interface_info: "{{ item }}"
+      junipernetworks.junos.junos_command:
+        commands: "{{ interface_item.commands }}"
+      register: command_outputs
 
-        - name: Display raw output for each command
-          ansible.builtin.debug:
-            msg: |
-              Device: {{ device_hostname }}
-              Interface: {{ interface_item.interface }}
-              
-              Show Interfaces:
-              {% if command_outputs.stdout_lines[0] is defined %}
-              {{ command_outputs.stdout_lines[0] | join(' ') }}
-              {% else %}
-              No output for 'show interfaces {{ interface_item.interface }}'
-              {% endif %}
-              
-              Show Interfaces Terse:
-              {% if command_outputs.stdout_lines[1] is defined %}
-              {{ command_outputs.stdout_lines[1] | join(' ') }}
-              {% else %}
-              No output for 'show interfaces terse {{ interface_item.interface }}'
-              {% endif %}
+    - name: Display raw output for each command
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ device_hostname }}
+          Interface: {{ interface_item.interface }}
+          
+          Show Interfaces:
+          {% if command_outputs.stdout_lines[0] is defined %}
+          {{ command_outputs.stdout_lines[0] | join(' ') }}
+          {% else %}
+          No output for 'show interfaces {{ interface_item.interface }}'
+          {% endif %}
+          
+          Show Interfaces Terse:
+          {% if command_outputs.stdout_lines[1] is defined %}
+          {{ command_outputs.stdout_lines[1] | join(' ') }}
+          {% else %}
+          No output for 'show interfaces terse {{ interface_item.interface }}'
+          {% endif %}
