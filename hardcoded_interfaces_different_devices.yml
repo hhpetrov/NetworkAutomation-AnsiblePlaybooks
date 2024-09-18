@@ -123,12 +123,7 @@
             commands: "{{ interface_info.commands }}"
           register: command_outputs
 
-        - name: Display the command output for each command
-          loop: "{{ command_outputs.results }}"
-          debug:
-            var: item.stdout_lines
-
-        - name: Aggregate results
+        - name: Aggregate results for each interface
           set_fact:
             aggregated_outputs: >-
               {{
@@ -139,6 +134,11 @@
                   }
                 })
               }}
+
+        - name: Display the command output for each command
+          loop: "{{ command_outputs.results }}"
+          debug:
+            var: item.stdout_lines
 
     - name: Display aggregated outputs
       debug:
