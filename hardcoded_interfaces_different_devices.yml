@@ -48,12 +48,11 @@
       register: command_outputs
       when: interface_info is defined
 
-    - name: Display output for each command
+    - name: Display raw output for each command
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          {% for command_output in command_outputs.stdout_lines %}
-          Output:
-          {{ command_output | join('\n') if command_output is defined else 'No output' }}
+          {% for output in command_outputs.stdout_lines %}
+          {{ output }}
           {% endfor %}
       when: command_outputs is defined
