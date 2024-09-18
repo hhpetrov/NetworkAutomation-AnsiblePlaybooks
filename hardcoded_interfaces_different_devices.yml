@@ -135,13 +135,19 @@
           {% for interface, commands in aggregated_outputs[device_hostname].items() %}
             Interface: {{ interface }}
             
-            Outputs:
+            Show Interfaces:
             {% if commands.show_interfaces %}
               {{ commands.show_interfaces }}
             {% else %}
               No output for 'show interfaces'
             {% endif %}
-
+            
+            Show Interfaces Terse:
+            {% if commands.show_interfaces_terse %}
+              {{ commands.show_interfaces_terse }}
+            {% else %}
+              No output for 'show interfaces terse'
+            {% endif %}
             
           {% endfor %}
       when: aggregated_outputs is defined
