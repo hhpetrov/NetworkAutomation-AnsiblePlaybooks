@@ -22,8 +22,8 @@
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
     - name: Display the device hostname
-        msg: Device: " {{ device_hostname }}"
       ansible.builtin.debug:
+        msg: "Device: {{ device_hostname }}"
 
     - name: Check if the device is in the map
       ansible.builtin.set_fact:
