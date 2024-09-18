@@ -92,14 +92,14 @@
             
             Show Interfaces:
             {% if commands.show_interfaces %}
-              {{ commands.show_interfaces }}
+              {{ commands.show_interfaces | replace('\n', ' ') }}
             {% else %}
               No output for 'show interfaces'
             {% endif %}
             
             Show Interfaces Terse:
             {% if commands.show_interfaces_terse %}
-              {{ commands.show_interfaces_terse }}
+              {{ commands.show_interfaces_terse | replace('\n', ' ') }}
             {% else %}
               No output for 'show interfaces terse'
             {% endif %}
