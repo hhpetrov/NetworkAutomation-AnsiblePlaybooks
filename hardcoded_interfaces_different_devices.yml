@@ -52,7 +52,18 @@
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          {% for output in command_outputs.stdout_lines %}
-          {{ output }}
-          {% endfor %}
+          
+          Show Interfaces {{ interface_info.interface }}:
+          {% if command_outputs.stdout_lines[0] is defined %}
+          {{ command_outputs.stdout_lines[0] | join('\n') }}
+          {% else %}
+          No output for 'show interfaces {{ interface_info.interface }}'
+          {% endif %}
+          
+          Show Interfaces Terse {{ interface_info.interface }}:
+          {% if command_outputs.stdout_lines[1] is defined %}
+          {{ command_outputs.stdout_lines[1] | join('\n') }}
+          {% else %}
+          No output for 'show interfaces terse {{ interface_info.interface }}'
+          {% endif %}
       when: command_outputs is defined
