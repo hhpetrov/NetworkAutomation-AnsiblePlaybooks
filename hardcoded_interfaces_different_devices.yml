@@ -37,11 +37,11 @@
       register: command_output
       when: interface_name is defined
 
-    - name: Display formatted command output with device name
+    - name: Display formatted command output with proper newlines
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
           Interface: {{ interface_name }}
           Output:
-          {{ command_output.stdout_lines | join('\n') | replace('[','') | replace(']','') | replace("'", '') }}
+          {{ '\n'.join(command_output.stdout_lines) if command_output.stdout_lines is defined else 'No output' }}
       when: interface_name is defined
