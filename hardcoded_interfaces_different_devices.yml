@@ -115,6 +115,10 @@
 
     - name: Run commands for each interface and aggregate results
       block:
+        - name: Initialize temporary results
+          set_fact:
+            temp_results: {}
+
         - name: Run commands for each interface
           loop: "{{ interface_info_list }}"
           vars:
@@ -122,15 +126,17 @@
           junipernetworks.junos.junos_command:
             commands: "{{ interface_info.commands }}"
           register: command_outputs
+          loop_control:
+            label: "{{ interface_info.interface }}"
 
         - name: Aggregate results for each interface
           set_fact:
-            aggregated_outputs: >-
+            temp_results: >-
               {{
-                aggregated_outputs | default({}) |
+                temp_results | default({}) |
                 combine({
                   device_hostname: {
-                    interface_info.interface: command_outputs.results | map(attribute='stdout_lines') | list
+                    (interface_info.interface | default('unknown')): command_outputs.results | map(attribute='stdout_lines') | list
                   }
                 })
               }}
@@ -139,6 +145,14 @@
           loop: "{{ command_outputs.results }}"
           debug:
             var: item.stdout_lines
+
+        - name: Combine temporary results into aggregated outputs
+          set_fact:
+            aggregated_outputs: >-
+              {{
+                aggregated_outputs | default({}) |
+                combine(temp_results)
+              }}
 
     - name: Display aggregated outputs
       debug:
