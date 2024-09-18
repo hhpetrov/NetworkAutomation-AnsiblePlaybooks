@@ -11,7 +11,7 @@
     - name: Run command to retrieve interface descriptions
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces descriptions
+          - show interfaces description
       register: command_output
 
     - name: Filter command output to include only lines with the predefined service name
@@ -21,6 +21,7 @@
             command_output.stdout_lines |
             flatten |
             select('search', predefined_service_name) |
+            map('regex_replace', '^(.+?)\\s+up\\s+up.*$', '\\1') |
             list
           }}
 
@@ -30,3 +31,22 @@
           Device: {{ inventory_hostname }}
           Filtered Command Output:
           {{ filtered_output | join('\n') }}
+
+    - name: Run additional commands for each found interface
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show interfaces {{ item }}"
+          - "show interfaces terse {{ item }}"
+        with_items: "{{ filtered_output }}"
+      register: additional_command_output
+
+    - name: Display additional command output
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Interface: {{ item.item }}
+          Show Interfaces Output:
+          {{ item.results[0].stdout_lines | join('\n') }}
+          Show Interfaces Terse Output:
+          {{ item.results[1].stdout_lines | join('\n') }}
+        with_items: "{{ additional_command_output.results }}"
