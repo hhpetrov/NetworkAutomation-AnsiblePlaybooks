@@ -19,4 +19,4 @@
         msg: |
           Device: {{ inventory_hostname }}
           Command Output:
-          {{ command_output.stdout_lines | join('\n') }}
+          {{ command_output.stdout_lines}}
