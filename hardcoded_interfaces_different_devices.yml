@@ -73,7 +73,7 @@
           commands:
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-            
+
   tasks:
     - name: Display inventory hostname
       ansible.builtin.debug:
@@ -107,10 +107,10 @@
       block:
         - name: Run commands for each interface
           loop: "{{ interface_info_list }}"
-          vars:
-            interface_info: "{{ item }}"
+          loop_control:
+            loop_var: interface_item
           junipernetworks.junos.junos_command:
-            commands: "{{ interface_info.commands }}"
+            commands: "{{ interface_item.commands }}"
           register: command_outputs
 
         - name: Aggregate command outputs
@@ -119,7 +119,7 @@
               {{
                 aggregated_outputs | combine({
                   device_hostname: aggregated_outputs[device_hostname] | default({}) | combine({
-                    item.interface: {
+                    interface_item.interface: {
                       'show_interfaces': (command_outputs.results[0].stdout_lines | join(' ') if command_outputs.results | length > 0 else 'No output for show interfaces command'),
                       'show_interfaces_terse': (command_outputs.results[1].stdout_lines | join(' ') if command_outputs.results | length > 1 else 'No output for show interfaces terse command')
                     }
@@ -127,9 +127,8 @@
                 })
               }}
           loop: "{{ interface_info_list }}"
-          vars:
-            item: "{{ item }}"
-            command_outputs: "{{ hostvars[inventory_hostname]['command_outputs'] }}"
+          loop_control:
+            loop_var: interface_item
 
     - name: Display aggregated outputs by device
       ansible.builtin.debug:
@@ -139,18 +138,10 @@
             Interface: {{ interface }}
             
             Show Interfaces:
-            {% if commands.show_interfaces %}
-              {{ commands.show_interfaces }}
-            {% else %}
-              No output for 'show interfaces'
-            {% endif %}
+            {{ commands.show_interfaces }}
             
             Show Interfaces Terse:
-            {% if commands.show_interfaces_terse %}
-              {{ commands.show_interfaces_terse }}
-            {% else %}
-              No output for 'show interfaces terse'
-            {% endif %}
+            {{ commands.show_interfaces_terse }}
             
           {% endfor %}
       when: aggregated_outputs is defined
