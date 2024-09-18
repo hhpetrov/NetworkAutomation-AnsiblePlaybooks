@@ -55,39 +55,44 @@
       ansible.builtin.set_fact:
         aggregated_outputs: {}
 
-    - name: Run commands for each interface
-      loop: "{{ interface_info_list }}"
-      vars:
-        interface_info: "{{ item }}"
-      junipernetworks.junos.junos_command:
-        commands: "{{ interface_info.commands }}"
-      register: command_outputs
+    - name: Run commands for each interface and aggregate results
+      block:
+        - name: Run commands for each interface
+          loop: "{{ interface_info_list }}"
+          vars:
+            interface_info: "{{ item }}"
+          junipernetworks.junos.junos_command:
+            commands: "{{ interface_info.commands }}"
+          register: command_outputs
 
-    - name: Aggregate command outputs
-      ansible.builtin.set_fact:
-        aggregated_outputs: >-
-          {{
-            aggregated_outputs | combine({
-              device_hostname: {
-                (item.interface + '_show_interfaces'): (command_outputs.results[0].stdout_lines | join('\n')),
-                (item.interface + '_show_interfaces_terse'): (command_outputs.results[1].stdout_lines | join('\n'))
-              }
-            })
-          }}
-      loop: "{{ interface_info_list }}"
-      vars:
-        item: "{{ item }}"
+        - name: Aggregate command outputs
+          ansible.builtin.set_fact:
+            aggregated_outputs: >-
+              {{
+                aggregated_outputs | combine({
+                  device_hostname: {
+                    (item.interface + '_show_interfaces'): 
+                      (command_outputs.results[0].stdout_lines | join('\n') if command_outputs.results | length > 0 else 'No output for command'),
+                    (item.interface + '_show_interfaces_terse'): 
+                      (command_outputs.results[1].stdout_lines | join('\n') if command_outputs.results | length > 1 else 'No output for command')
+                  }
+                })
+              }}
+          loop: "{{ interface_info_list }}"
+          vars:
+            item: "{{ item }}"
+            command_outputs: "{{ hostvars[inventory_hostname]['command_outputs'] }}"
 
     - name: Display aggregated outputs by device
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          {% for interface, output in aggregated_outputs[device_hostname].items() %}
-            {{ interface }}:
-            {% if output %}
-              {{ output }}
+          {% for key, value in aggregated_outputs[device_hostname].items() %}
+            {{ key }}:
+            {% if value %}
+              {{ value }}
             {% else %}
-              No output for '{{ interface }}'
+              No output for '{{ key }}'
             {% endif %}
           {% endfor %}
       when: aggregated_outputs is defined
