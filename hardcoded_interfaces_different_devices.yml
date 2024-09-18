@@ -6,8 +6,8 @@
 
   vars:
     device_interface_map:
-      "192.168.68.152": "ae1"
-      "192.168.68.157": "ge-0/0/1"
+      "172.18.3.13": "ge-0/0/9.102"
+      "172.18.1.40": "ge-0/0/9.102"
 
   tasks:
     - name: Retrieve device hostname
