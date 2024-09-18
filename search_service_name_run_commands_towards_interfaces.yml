@@ -11,7 +11,7 @@
     - name: Run command to retrieve interface descriptions
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces description
+          - show interfaces descriptions
       register: command_output
 
     - name: Filter command output to include only lines with the predefined service name
