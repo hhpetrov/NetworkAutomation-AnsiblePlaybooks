@@ -9,68 +9,82 @@
       "172.18.3.13":
         - interface: "ge-0/0/9.102"
           commands:
+            - show version | match Hostname
             - show interfaces ge-0/0/9.102
             - show interfaces terse ge-0/0/9.102
       "172.18.1.40":
         - interface: "ge-0/0/9.102"
           commands:
+            - show version | match Hostname
             - show interfaces ge-0/0/9.102
             - show interfaces terse ge-0/0/9.102
       "192.168.75.116":
         - interface: "lt-1/1/0.104"
           commands:
+            - show version | match Hostname
             - show interfaces lt-1/1/0.104
             - show interfaces terse lt-1/1/0.104
         - interface: "lt-1/1/0.105"
           commands:
+            - show version | match Hostname
             - show interfaces lt-1/1/0.105
             - show interfaces terse lt-1/1/0.105
       "192.168.75.110":
         - interface: "ae6.104"
           commands:
+            - show version | match Hostname
             - show interfaces ae6.104
             - show interfaces terse ae6.104
       "172.18.24.32":
         - interface: "ge-0/0/9.303"
           commands:
+            - show version | match Hostname
             - show interfaces ge-0/0/9.303
             - show interfaces terse ge-0/0/9.303  
       "172.18.24.33":
         - interface: "ge-0/0/9.303"
           commands:
+            - show version | match Hostname
             - show interfaces ge-0/0/9.303
             - show interfaces terse ge-0/0/9.303
         - interface: "xe-0/0/38.103"
           commands:
+            - show version | match Hostname
             - show interfaces xe-0/0/38.103
             - show interfaces terse xe-0/0/38.103
       "172.18.24.9":
         - interface: "lt-0/0/0.103"
           commands:
+            - show version | match Hostname
             - show interfaces lt-0/0/0.103
             - show interfaces terse lt-0/0/0.103
         - interface: "lt-0/0/0.104"
           commands:
+            - show version | match Hostname
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
             
         - interface: "lt-0/0/0.303"
           commands:
+            - show version | match Hostname
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
             
         - interface: "lt-0/0/0.304"
           commands:
+            - show version | match Hostname
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
             
         - interface: "lt-1/0/0.303"
           commands:
+            - show version | match Hostname
             - show interfaces lt-1/0/0.303
             - show interfaces terse lt-1/0/0.303  
             
         - interface: "lt-1/0/0.304"
           commands:
+            - show version | match Hostname
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
             
