@@ -8,47 +8,64 @@
     devices:
       - "172.18.3.13"
       - "172.18.1.40"
-      
+
   tasks:
-    - name: Retrieve routing instances for each device
+    - name: Retrieve interface descriptions from each device
       junipernetworks.junos.junos_command:
         commands:
-          - show configuration routing-instances KT_EPS044293T
-      register: routing_instances
+          - show interfaces description | match "{{ predefined_service_name }}"
+      register: interface_descriptions
       delegate_to: "{{ item }}"
       with_items: "{{ devices }}"
 
-    - name: Validate the service name and extract service interfaces
+    - name: Debug raw interface descriptions output
+      ansible.builtin.debug:
+        msg: "{{ interface_descriptions.results | map(attribute='stdout_lines') | list }}"
+
+    - name: Extract interfaces related to predefined service
       set_fact:
         service_interfaces: >-
           {{
-            routing_instances.results | selectattr('stdout_lines', 'defined') | selectattr('stdout_lines', 'search', predefined_service_name) | map(attribute='stdout_lines') | list | first | regex_findall('interfaces\\s+([\\S]+)')
+            interface_descriptions.results | selectattr('stdout_lines', 'defined') | 
+            map(attribute='stdout_lines') | list | 
+            flatten | 
+            select('search', predefined_service_name) | 
+            map('regex_findall', '^(\\S+)\\s+') | 
+            map('first') | list
           }}
-      when: routing_instances.results | length > 0 and routing_instances.results | selectattr('stdout_lines', 'search', predefined_service_name) | list | length > 0
+      when: interface_descriptions.results | length > 0
 
-    - name: Fail if the service name is not found on any device
+    - name: Fail if no interfaces are found for the predefined service
       fail:
-        msg: "The predefined service name '{{ predefined_service_name }}' was not found on any device."
+        msg: "No interfaces found for the predefined service '{{ predefined_service_name }}'."
       when: service_interfaces is not defined or service_interfaces | length == 0
 
-    - name: Display the interfaces associated with the service
-      ansible.builtin.debug:
-        msg: "Service {{ predefined_service_name }} has interfaces: {{ service_interfaces }}"
+    - name: Show details for each found interface
+      block:
+        - name: Show interface details
+          junipernetworks.junos.junos_command:
+            commands:
+              - show interfaces {{ item }}
+          register: interface_details
+          loop: "{{ service_interfaces }}"
+          when: service_interfaces is defined and service_interfaces | length > 0
 
-    - name: Run commands on each interface
-      junipernetworks.junos.junos_command:
-        commands:
-          - show interfaces {{ item }}
-      loop: "{{ service_interfaces }}"
-      register: command_output
-      when: service_interfaces is defined and service_interfaces | length > 0
+        - name: Show terse interface details
+          junipernetworks.junos.junos_command:
+            commands:
+              - show interfaces {{ item }} terse
+          register: terse_interface_details
+          loop: "{{ service_interfaces }}"
+          when: service_interfaces is defined and service_interfaces | length > 0
 
-    - name: Display command outputs for each interface
+    - name: Display detailed output for each interface
       ansible.builtin.debug:
         msg: |
           Device: {{ inventory_hostname }}
           Interface: {{ item }}
-          Output:
-          {{ command_output.results[loop.index0].stdout_lines | join('\n') }}
+          Detailed Output:
+          {{ interface_details.results[loop.index0].stdout_lines | join('\n') }}
+          Terse Output:
+          {{ terse_interface_details.results[loop.index0].stdout_lines | join('\n') }}
       loop: "{{ service_interfaces }}"
-      when: command_output.results | length > 0
+      when: interface_details.results | length > 0 and terse_interface_details.results | length > 0
