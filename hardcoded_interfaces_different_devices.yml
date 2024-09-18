@@ -102,7 +102,6 @@
 
     - name: Display the device hostname and system information
       debug:
-        msg: "Device: {{ device_hostname }}"
         var: system_information
 
     - name: Check if the device is in the map
@@ -127,7 +126,7 @@
         - name: Display the command output for each command
           loop: "{{ command_outputs.results }}"
           debug:
-            msg: "Command output: {{ item.stdout_lines }}"
+            var: item.stdout_lines
 
     - name: Aggregate results
       set_fact:
