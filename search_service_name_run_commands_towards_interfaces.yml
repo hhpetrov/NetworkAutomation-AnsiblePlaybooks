@@ -14,6 +14,12 @@
           - show interfaces description
       register: command_output
 
+    - name: Display raw command output
+      ansible.builtin.debug:
+        msg: |
+          Raw Command Output:
+          {{ command_output.stdout_lines | flatten | join('\n') }}
+
     - name: Filter command output to include only lines with the predefined service name
       set_fact:
         filtered_output: >-
@@ -28,7 +34,6 @@
     - name: Display filtered command output
       ansible.builtin.debug:
         msg: |
-          Device: {{ inventory_hostname }}
           Filtered Command Output:
           {{ filtered_output | join('\n') }}
 
