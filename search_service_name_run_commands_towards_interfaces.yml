@@ -8,15 +8,25 @@
     predefined_service_name: "KT_EPS044293T"  # Replace with your specific service name
 
   tasks:
-    - name: Run command to match predefined service name
+    - name: Run command to retrieve interface descriptions
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces descriptions | match KT_EPS044293T
+          - show interfaces description
       register: command_output
 
-    - name: Display command output
+    - name: Filter command output to include only lines with the predefined service name
+      set_fact:
+        filtered_output: >-
+          {{
+            command_output.stdout_lines |
+            flatten |
+            select('search', predefined_service_name) |
+            list
+          }}
+
+    - name: Display filtered command output
       ansible.builtin.debug:
         msg: |
           Device: {{ inventory_hostname }}
-          Command Output:
-          {{ command_output.stdout_lines}}
+          Filtered Command Output:
+          {{ filtered_output | join('\n') }}
