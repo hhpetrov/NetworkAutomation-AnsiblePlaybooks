@@ -6,8 +6,8 @@
   vars:
     predefined_service_name: "YOUR_SERVICE_NAME"  # Replace with your specific service name
     devices:
-      - "192.168.68.152"
-      - "192.168.68.157"
+      - "172.18.3.13"
+      - "172.18.1.40"
 
   tasks:
     - name: Retrieve VRF services for each device
