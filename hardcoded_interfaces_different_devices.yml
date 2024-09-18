@@ -16,10 +16,6 @@
           - show version | match Hostname
       register: device_info
 
-    - name: Debug device_info to verify content
-      ansible.builtin.debug:
-        var: device_info.stdout_lines
-
     - name: Extract the device hostname from the output
       ansible.builtin.set_fact:
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
@@ -47,5 +43,5 @@
           Device: {{ device_hostname }}
           Interface: {{ interface_name }}
           Output:
-          {{ command_output.stdout_lines | join('\n') }}
+          {{ command_output.stdout_lines | join('\n') | replace('[','') | replace(']','') | replace("'", '') }}
       when: interface_name is defined
