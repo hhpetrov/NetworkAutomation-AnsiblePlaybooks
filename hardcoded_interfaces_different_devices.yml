@@ -37,11 +37,16 @@
       register: command_output
       when: interface_name is defined
 
+    - name: Flatten command output to a list of strings
+      set_fact:
+        flattened_output: "{{ command_output.stdout_lines | map('flatten') | list | join('\n') }}"
+      when: command_output.stdout_lines is defined
+
     - name: Display formatted command output with proper newlines
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
           Interface: {{ interface_name }}
           Output:
-          {{ '\n'.join(command_output.stdout_lines) if command_output.stdout_lines is defined else 'No output' }}
+          {{ flattened_output if command_output.stdout_lines is defined else 'No output' }}
       when: interface_name is defined
