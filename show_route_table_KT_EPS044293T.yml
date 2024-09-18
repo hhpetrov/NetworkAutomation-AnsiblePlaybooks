@@ -1,15 +1,19 @@
 ---
-- name: Retrieve interfaces from Junos device
+- name: Retrieve information from Junos device
   hosts: 172.18.3.13, 172.18.1.40, 192.168.75.116, 172.18.24.9
   gather_facts: no
   connection: local
 
   tasks:
-    - name: Run 'show system information' command to get device name
+    - name: Run 'show system information' command
       junipernetworks.junos.junos_command:
         commands:
           - show system information
       register: system_info
+
+    - name: Display the system information
+      ansible.builtin.debug:
+        var: system_info.stdout_lines
 
     - name: Run 'show route table KT_EPS044293T.inet.0' command
       junipernetworks.junos.junos_command:
@@ -17,8 +21,6 @@
           - show route table KT_EPS044293T.inet.0
       register: route_table
 
-    - name: Display the system information and route table output
+    - name: Display the route table output
       ansible.builtin.debug:
-        msg:
-          - "Device: {{ system_info.stdout_lines[0] }}"
-          - "Route Table Output: {{ route_table.stdout_lines }}"
+        var: route_table.stdout_lines
