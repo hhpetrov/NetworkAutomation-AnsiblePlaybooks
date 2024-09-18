@@ -8,13 +8,13 @@
     devices:
       - "172.18.3.13"
       - "172.18.1.40"
-
+      
   tasks:
-    - name: Retrieve VRF services for each device
+    - name: Retrieve routing instances for each device
       junipernetworks.junos.junos_command:
         commands:
           - show configuration routing-instances
-      register: vrf_services
+      register: routing_instances
       delegate_to: "{{ item }}"
       with_items: "{{ devices }}"
 
@@ -22,9 +22,9 @@
       set_fact:
         service_interfaces: >-
           {{
-            vrf_services.results | selectattr('stdout_lines', 'defined') | selectattr('stdout_lines', 'search', predefined_service_name) | map(attribute='stdout_lines') | list | first | regex_findall('interfaces\\s+([\\S]+)')
+            routing_instances.results | selectattr('stdout_lines', 'defined') | selectattr('stdout_lines', 'search', predefined_service_name) | map(attribute='stdout_lines') | list | first | regex_findall('interfaces\\s+([\\S]+)')
           }}
-      when: vrf_services.results | length > 0 and vrf_services.results | selectattr('stdout_lines', 'search', predefined_service_name) | list | length > 0
+      when: routing_instances.results | length > 0 and routing_instances.results | selectattr('stdout_lines', 'search', predefined_service_name) | list | length > 0
 
     - name: Fail if the service name is not found on any device
       fail:
