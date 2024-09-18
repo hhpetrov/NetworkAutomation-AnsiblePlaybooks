@@ -1,6 +1,6 @@
 ---
 - name: Retrieve interfaces from Junos device
-  hosts: 172.18.3.13, 172.18.1.40, 192.168.75.116, 172.,18.24.9
+  hosts: 172.18.3.13, 172.18.1.40, 192.168.75.116, 172.18.24.9
   gather_facts: no
   connection: local
 
