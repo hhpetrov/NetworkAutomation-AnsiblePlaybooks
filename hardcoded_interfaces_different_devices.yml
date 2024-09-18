@@ -34,7 +34,7 @@
         - interface: "ge-0/0/9.303"
           commands:
             - show interfaces ge-0/0/9.303
-            - show interfaces terse ge-0/0/9.303  
+            - show interfaces terse ge-0/0/9.303
       "172.18.24.33":
         - interface: "ge-0/0/9.303"
           commands:
@@ -53,27 +53,23 @@
           commands:
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
-            
         - interface: "lt-0/0/0.303"
           commands:
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
-            
         - interface: "lt-0/0/0.304"
           commands:
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
-            
         - interface: "lt-1/0/0.303"
           commands:
             - show interfaces lt-1/0/0.303
-            - show interfaces terse lt-1/0/0.303  
-            
+            - show interfaces terse lt-1/0/0.303
         - interface: "lt-1/0/0.304"
           commands:
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-            
+
   tasks:
     - name: Display inventory hostname
       ansible.builtin.debug:
@@ -99,58 +95,34 @@
         interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
       when: inventory_hostname in device_interface_map
 
-    - name: Initialize aggregated outputs
-      ansible.builtin.set_fact:
-        aggregated_outputs: {}
-
-    - name: Run commands for each interface and aggregate results
-      block:
-        - name: Run commands for each interface
-          loop: "{{ interface_info_list }}"
-          vars:
-            interface_info: "{{ item }}"
+    - name: Run commands for each interface separately
+      vars:
+        interface_info: "{{ item }}"
+      loop: "{{ interface_info_list }}"
+      loop_control:
+        loop_var: interface_item  # Renamed loop variable to avoid conflict
+      tasks:
+        - name: Run commands on interface {{ interface_item.interface }}
           junipernetworks.junos.junos_command:
-            commands: "{{ interface_info.commands }}"
+            commands: "{{ interface_item.commands }}"
           register: command_outputs
 
-        - name: Aggregate command outputs
-          ansible.builtin.set_fact:
-            aggregated_outputs: >-
-              {{
-                aggregated_outputs | combine({
-                  device_hostname: aggregated_outputs[device_hostname] | default({}) | combine({
-                    item.interface: {
-                      'show_interfaces': (command_outputs.results[0].stdout_lines | join(' ') if command_outputs.results | length > 0 else 'No output for show interfaces command'),
-                      'show_interfaces_terse': (command_outputs.results[1].stdout_lines | join(' ') if command_outputs.results | length > 1 else 'No output for show interfaces terse command')
-                    }
-                  })
-                })
-              }}
-          loop: "{{ interface_info_list }}"
-          vars:
-            item: "{{ item }}"
-            command_outputs: "{{ hostvars[inventory_hostname]['command_outputs'] }}"
-
-    - name: Display aggregated outputs by device
-      ansible.builtin.debug:
-        msg: |
-          Device: {{ device_hostname }}
-          {% for interface, commands in aggregated_outputs[device_hostname].items() %}
-            Interface: {{ interface }}
-            
-            Show Interfaces:
-            {% if commands.show_interfaces %}
-              {{ commands.show_interfaces }}
-            {% else %}
-              No output for 'show interfaces'
-            {% endif %}
-            
-            Show Interfaces Terse:
-            {% if commands.show_interfaces_terse %}
-              {{ commands.show_interfaces_terse }}
-            {% else %}
-              No output for 'show interfaces terse'
-            {% endif %}
-            
-          {% endfor %}
-      when: aggregated_outputs is defined
+        - name: Display raw output for each command
+          ansible.builtin.debug:
+            msg: |
+              Device: {{ device_hostname }}
+              Interface: {{ interface_item.interface }}
+              
+              Show Interfaces:
+              {% if command_outputs.stdout_lines[0] is defined %}
+              {{ command_outputs.stdout_lines[0] | join(' ') }}
+              {% else %}
+              No output for 'show interfaces {{ interface_item.interface }}'
+              {% endif %}
+              
+              Show Interfaces Terse:
+              {% if command_outputs.stdout_lines[1] is defined %}
+              {{ command_outputs.stdout_lines[1] | join(' ') }}
+              {% else %}
+              No output for 'show interfaces terse {{ interface_item.interface }}'
+              {% endif %}
