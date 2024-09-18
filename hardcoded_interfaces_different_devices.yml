@@ -1,3 +1,4 @@
+---
 - name: Retrieve specific interface from a Junos device and display device name
   hosts: all
   gather_facts: no
@@ -33,7 +34,7 @@
         - interface: "ge-0/0/9.303"
           commands:
             - show interfaces ge-0/0/9.303
-            - show interfaces terse ge-0/0/9.303
+            - show interfaces terse ge-0/0/9.303  
       "172.18.24.33":
         - interface: "ge-0/0/9.303"
           commands:
@@ -52,50 +53,104 @@
           commands:
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
+            
         - interface: "lt-0/0/0.303"
           commands:
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
+            
         - interface: "lt-0/0/0.304"
           commands:
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
+            
         - interface: "lt-1/0/0.303"
           commands:
             - show interfaces lt-1/0/0.303
-            - show interfaces terse lt-1/0/0.303
+            - show interfaces terse lt-1/0/0.303  
+            
         - interface: "lt-1/0/0.304"
           commands:
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-
+            
   tasks:
     - name: Display inventory hostname
-      debug:
+      ansible.builtin.debug:
         msg: "Inventory hostname: {{ inventory_hostname }}"
 
     - name: Retrieve device hostname
-      command: ssh -o StrictHostKeyChecking=no {{ inventory_hostname }} 'show version | match Hostname'
+      junipernetworks.junos.junos_command:
+        commands:
+          - show version | match Hostname
       register: device_info
 
     - name: Extract the device hostname from the output
-      set_fact:
+      ansible.builtin.set_fact:
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
     - name: Display the device hostname
-      debug:
+      ansible.builtin.debug:
         msg: "Device: {{ device_hostname }}"
 
-    - name: Run commands on specific interfaces
-      command: ssh -o StrictHostKeyChecking=no {{ inventory_hostname }} 'show interfaces {{ item.interface}}'
-      loop: "{{ device_interface_map[inventory_hostname] }}"
-      register: interface_output
+    - name: Check if the device is in the map
+      ansible.builtin.set_fact:
+        interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
+      when: inventory_hostname in device_interface_map
 
-    - name: Aggregate output by device
-      set_fact:
-        aggregated_output="{{ aggregated_output | default([]) + [device_hostname: interface_output.results] }}"
+    - name: Initialize aggregated outputs
+      ansible.builtin.set_fact:
+        aggregated_outputs: {}
 
-    - name: Display aggregated output
-      debug:
-        var: aggregated_output
+    - name: Run commands for each interface and aggregate results
+      block:
+        - name: Run commands for each interface
+          loop: "{{ interface_info_list }}"
+          vars:
+            interface_info: "{{ item }}"
+          junipernetworks.junos.junos_command:
+            commands: "{{ interface_info.commands }}"
+          register: command_outputs
+
+        - name: Aggregate command outputs
+          ansible.builtin.set_fact:
+            aggregated_outputs: >-
+              {{
+                aggregated_outputs | combine({
+                  device_hostname: aggregated_outputs[device_hostname] | default({}) | combine({
+                    item.interface: {
+                      'show_interfaces': (command_outputs.results[0].stdout_lines | join(' ') if command_outputs.results | length > 0 else 'No output for show interfaces command'),
+                      'show_interfaces_terse': (command_outputs.results[1].stdout_lines | join(' ') if command_outputs.results | length > 1 else 'No output for show interfaces terse command')
+                    }
+                  })
+                })
+              }}
+          loop: "{{ interface_info_list }}"
+          vars:
+            item: "{{ item }}"
+            command_outputs: "{{ hostvars[inventory_hostname]['command_outputs'] }}"
+
+    - name: Display aggregated outputs by device
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ device_hostname }}
+          {% for interface, commands in aggregated_outputs[device_hostname].items() %}
+            Interface: {{ interface }}
+            
+            Show Interfaces:
+            {% if commands.show_interfaces %}
+              {{ commands.show_interfaces }}
+            {% else %}
+              No output for 'show interfaces'
+            {% endif %}
+            
+            Show Interfaces Terse:
+            {% if commands.show_interfaces_terse %}
+              {{ commands.show_interfaces_terse }}
+            {% else %}
+              No output for 'show interfaces terse'
+            {% endif %}
+            
+          {% endfor %}
+      when: aggregated_outputs is defined
