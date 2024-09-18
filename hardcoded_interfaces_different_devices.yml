@@ -1,4 +1,3 @@
----
 - name: Retrieve specific interface from a Junos device and display device name
   hosts: all
   gather_facts: no
@@ -72,55 +71,34 @@
 
   tasks:
     - name: Display inventory hostname
-      ansible.builtin.debug:
+      debug:
         msg: "Inventory hostname: {{ inventory_hostname }}"
 
     - name: Retrieve device hostname
-      junipernetworks.junos.junos_command:
+      junosnetworks.junos.junos_command:
         commands:
           - show version | match Hostname
       register: device_info
 
     - name: Extract the device hostname from the output
-      ansible.builtin.set_fact:
+      set_fact:
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
     - name: Display the device hostname
-      ansible.builtin.debug:
+      debug:
         msg: "Device: {{ device_hostname }}"
 
-    - name: Check if the device is in the map
-      ansible.builtin.set_fact:
-        interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
-      when: inventory_hostname in device_interface_map
+    - name: Run commands on specific interfaces
+      junosnetworks.junos.junos_command:
+        commands: "{{ item.commands }}"
+      loop: "{{ device_interface_map[inventory_hostname] }}"
+      register: interface_output
 
-    - name: Run commands for each interface separately
-      loop: "{{ interface_info_list }}"
-      loop_control:
-        loop_var: interface
-      vars:
-        interface_info: "{{ item }}"
-      junipernetworks.junos.junos_command:
-        commands: "{{ interface_info.commands }}"
-      register: command_outputs
+    - name: Aggregate output by device
+      set_fact:
+        aggregated_output="{{ aggregated_output | default([]) + [device_hostname: interface_output.results] }}"
 
-    - name: Display raw output for each command
-      ansible.builtin.debug:
-        msg: |
-          Device: {{ device_hostname }}
-          Interface: {{ interface.interface }}
-
-          Show Interfaces:
-          {% if command_outputs.stdout_lines[0] is defined %}
-            {{ command_outputs.stdout_lines[0] | join(' ') }}
-          {% else %}
-            No output for 'show interfaces {{ interface.interface }}'
-          {% endif %}
-
-          Show Interfaces Terse:
-          {% if command_outputs.stdout_lines[1] is defined %}
-            {{ command_outputs.stdout_lines[1] | join(' ') }}
-          {% else %}
-            No output for 'show interfaces terse {{ interface.interface }}'
-          {% endif %}
+    - name: Display aggregated output
+      debug:
+        var: aggregated_output
