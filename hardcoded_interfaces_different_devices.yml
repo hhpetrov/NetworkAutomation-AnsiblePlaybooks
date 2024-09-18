@@ -7,25 +7,24 @@
   vars:
     device_interface_map:
       "172.18.3.13":
-        interface: "ge-0/0/9.102"
-        commands:
-          - show interfaces ge-0/0/9.102
-          - show interfaces terse ge-0/0/9.102
+        - interface: "ge-0/0/9.102"
+          commands:
+            - show interfaces ge-0/0/9.102
+            - show interfaces terse ge-0/0/9.102"
       "172.18.1.40":
-        interface: "ge-0/0/9.102"
-        commands:
-          - show interfaces ge-0/0/9.102
-          - show interfaces terse ge-0/0/9.102
+        - interface: "ge-0/0/9.102"
+          commands:
+            - show interfaces ge-0/0/9.102
+            - show interfaces terse ge-0/0/9.102"
       "192.168.75.116":
-        interface: "lt-1/1/0.104"
-        commands:
-          - show interfaces lt-1/1/0.104
-          - show interfaces terse lt-1/1/0.104
-      "192.168.75.116":
-        interface: "lt-1/1/0.105"
-        commands:
-          - show interfaces lt-1/1/0.105
-          - show interfaces terse lt-1/1/0.105
+        - interface: "lt-1/1/0.104"
+          commands:
+            - show interfaces lt-1/1/0.104
+            - show interfaces terse lt-1/1/0.104"
+        - interface: "lt-1/1/0.105"
+          commands:
+            - show interfaces lt-1/1/0.105
+            - show interfaces terse lt-1/1/0.105"
 
   tasks:
     - name: Display inventory hostname
@@ -49,31 +48,36 @@
 
     - name: Check if the device is in the map
       ansible.builtin.set_fact:
-        interface_info: "{{ device_interface_map[inventory_hostname] }}"
+        interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
       when: inventory_hostname in device_interface_map
 
-    - name: Run commands based on interface info
+    - name: Run commands for each interface
+      loop: "{{ interface_info_list }}"
+      vars:
+        interface_info: "{{ item }}"
       junipernetworks.junos.junos_command:
         commands: "{{ interface_info.commands }}"
       register: command_outputs
-      when: interface_info is defined
 
     - name: Display raw output for each command
+      loop: "{{ interface_info_list }}"
+      vars:
+        interface_info: "{{ item }}"
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
           
           Show Interfaces {{ interface_info.interface }}:
-          {% if command_outputs.stdout_lines[0] is defined %}
-          {{ command_outputs.stdout_lines[0] | join('\n') }}
+          {% if command_outputs.results[loop.index0].stdout_lines[0] is defined %}
+          {{ command_outputs.results[loop.index0].stdout_lines[0] | join('\n') }}
           {% else %}
           No output for 'show interfaces {{ interface_info.interface }}'
           {% endif %}
           
           Show Interfaces Terse {{ interface_info.interface }}:
-          {% if command_outputs.stdout_lines[1] is defined %}
-          {{ command_outputs.stdout_lines[1] | join('\n') }}
+          {% if command_outputs.results[loop.index0].stdout_lines[1] is defined %}
+          {{ command_outputs.results[loop.index0].stdout_lines[1] | join('\n') }}
           {% else %}
           No output for 'show interfaces terse {{ interface_info.interface }}'
           {% endif %}
-      when: command_outputs is defined
+      when: command_outputs.results is defined
