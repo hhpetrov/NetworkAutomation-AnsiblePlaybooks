@@ -1,4 +1,3 @@
----
 - name: Retrieve specific interface from a Junos device and display device name
   hosts: all
   gather_facts: no
@@ -40,7 +39,7 @@
           commands:
             - show system information
             - show interfaces ge-0/0/9.303
-            - show interfaces terse ge-0/0/9.303  
+            - show interfaces terse ge-0/0/9.303
       "172.18.24.33":
         - interface: "ge-0/0/9.303"
           commands:
@@ -63,58 +62,56 @@
             - show system information
             - show interfaces lt-0/0/0.104
             - show interfaces terse lt-0/0/0.104
-            
         - interface: "lt-0/0/0.303"
           commands:
             - show system information
             - show interfaces lt-0/0/0.303
             - show interfaces terse lt-0/0/0.303
-            
         - interface: "lt-0/0/0.304"
           commands:
             - show system information
             - show interfaces lt-0/0/0.304
             - show interfaces terse lt-0/0/0.304
-            
         - interface: "lt-1/0/0.303"
           commands:
             - show system information
             - show interfaces lt-1/0/0.303
-            - show interfaces terse lt-1/0/0.303  
-            
+            - show interfaces terse lt-1/0/0.303
         - interface: "lt-1/0/0.304"
           commands:
             - show system information
             - show interfaces lt-1/0/0.304
             - show interfaces terse lt-1/0/0.304
-            
+
   tasks:
     - name: Display inventory hostname
-      ansible.builtin.debug:
+      debug:
         msg: "Inventory hostname: {{ inventory_hostname }}"
 
-    - name: Retrieve device hostname
+    - name: Retrieve device hostname and system information
       junipernetworks.junos.junos_command:
         commands:
           - show system information
       register: device_info
 
-    - name: Extract the device hostname from the output
-      ansible.builtin.set_fact:
+    - name: Extract the device hostname and system information
+      set_fact:
         device_hostname: "{{ (device_info.stdout_lines[0] | select('search', 'Hostname:') | list)[0].split(':')[-1] | trim }}"
+        system_information: "{{ device_info.stdout_lines }}"
       when: device_info.stdout_lines is defined and device_info.stdout_lines | length > 0
 
-    - name: Display the device hostname
-      ansible.builtin.debug:
+    - name: Display the device hostname and system information
+      debug:
         msg: "Device: {{ device_hostname }}"
+        var: system_information
 
     - name: Check if the device is in the map
-      ansible.builtin.set_fact:
+      set_fact:
         interface_info_list: "{{ device_interface_map[inventory_hostname] }}"
       when: inventory_hostname in device_interface_map
 
     - name: Initialize aggregated outputs
-      ansible.builtin.set_fact:
+      set_fact:
         aggregated_outputs: {}
 
     - name: Run commands for each interface and aggregate results
@@ -126,3 +123,16 @@
           junipernetworks.junos.junos_command:
             commands: "{{ interface_info.commands }}"
           register: command_outputs
+
+        - name: Display the command output for each command
+          loop: "{{ command_outputs.results }}"
+          debug:
+            msg: "Command output: {{ item.stdout_lines }}"
+
+    - name: Aggregate results
+      set_fact:
+        aggregated_outputs: "{{ aggregated_outputs | default({}) | combine({{ device_hostname }}: {interface_info.interface: command_outputs.results}) }}"
+
+    - name: Display aggregated outputs
+      debug:
+        var: aggregated_outputs
