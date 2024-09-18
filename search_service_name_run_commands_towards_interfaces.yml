@@ -4,7 +4,7 @@
   gather_facts: no
 
   vars:
-    predefined_service_name: "YOUR_SERVICE_NAME"  # Replace with your specific service name
+    predefined_service_name: "KT_EPS044293T"  # Replace with your specific service name
     devices:
       - "172.18.3.13"
       - "172.18.1.40"
