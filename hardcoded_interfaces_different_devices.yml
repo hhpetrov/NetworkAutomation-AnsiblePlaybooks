@@ -6,8 +6,16 @@
 
   vars:
     device_interface_map:
-      "172.18.3.13": "ge-0/0/9.102"
-      "172.18.1.40": "ge-0/0/9.102"
+      "172.18.3.13":
+        interface: "ge-0/0/9.102"
+        commands:
+          - show interfaces
+          - show interfaces terse
+      "172.18.1.40":
+        interface: "ge-0/0/9.102"
+        commands:
+          - show interfaces
+          - show interfaces terse
 
   tasks:
     - name: Display inventory hostname
@@ -31,33 +39,22 @@
 
     - name: Check if the device is in the map
       ansible.builtin.set_fact:
-        interface_name: "{{ device_interface_map[inventory_hostname] }}"
+        interface_info: "{{ device_interface_map[inventory_hostname] }}"
       when: inventory_hostname in device_interface_map
 
-    - name: Run 'show interfaces' command for the specific interface
+    - name: Run commands based on interface info
       junipernetworks.junos.junos_command:
-        commands:
-          - show interfaces
-      register: show_interfaces_output
-      when: interface_name is defined
+        commands: "{{ interface_info.commands }}"
+      register: command_outputs
+      when: interface_info is defined
 
-    - name: Run 'show interfaces terse' command for the specific interface
-      junipernetworks.junos.junos_command:
-        commands:
-          - show interfaces terse
-      register: show_interfaces_terse_output
-      when: interface_name is defined
-
-    - name: Display the output of 'show interfaces'
+    - name: Display output for each command
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          Show Interfaces:
-          {{ show_interfaces_output.stdout_lines | join('\n') if show_interfaces_output.stdout_lines is defined else 'No output' }}
-
-    - name: Display the output of 'show interfaces terse'
-      ansible.builtin.debug:
-        msg: |
-          Device: {{ device_hostname }}
-          Show Interfaces Terse:
-          {{ show_interfaces_terse_output.stdout_lines | join('\n') if show_interfaces_terse_output.stdout_lines is defined else 'No output' }}
+          {% for command, output in command_outputs.stdout_lines.items() %}
+          Command: {{ command }}
+          Output:
+          {{ output | join('\n') if output is defined else 'No output' }}
+          {% endfor %}
+      when: command_outputs is defined
