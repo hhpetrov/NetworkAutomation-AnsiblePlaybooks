@@ -21,6 +21,9 @@
         commands:
           - show interfaces lt-1/1/0.104
           - show interfaces terse lt-1/1/0.104
+      "192.168.75.116":
+        interface: "lt-1/1/0.105"
+        commands:
           - show interfaces lt-1/1/0.105
           - show interfaces terse lt-1/1/0.105
 
