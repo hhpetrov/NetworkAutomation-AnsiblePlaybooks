@@ -72,8 +72,8 @@
                 aggregated_outputs | combine({
                   device_hostname: aggregated_outputs[device_hostname] | default({}) | combine({
                     item.interface: {
-                      'show_interfaces': (command_outputs.results[0].stdout_lines | join('\n') if command_outputs.results | length > 0 else 'No output for show interfaces command'),
-                      'show_interfaces_terse': (command_outputs.results[1].stdout_lines | join('\n') if command_outputs.results | length > 1 else 'No output for show interfaces terse command')
+                      'show_interfaces': (command_outputs.results[0].stdout_lines | join(' ') if command_outputs.results | length > 0 else 'No output for show interfaces command'),
+                      'show_interfaces_terse': (command_outputs.results[1].stdout_lines | join(' ') if command_outputs.results | length > 1 else 'No output for show interfaces terse command')
                     }
                   })
                 })
@@ -89,6 +89,7 @@
           Device: {{ device_hostname }}
           {% for interface, commands in aggregated_outputs[device_hostname].items() %}
             Interface: {{ interface }}
+            
             Show Interfaces:
             {% if commands.show_interfaces %}
               {{ commands.show_interfaces }}
@@ -102,5 +103,6 @@
             {% else %}
               No output for 'show interfaces terse'
             {% endif %}
+            
           {% endfor %}
       when: aggregated_outputs is defined
