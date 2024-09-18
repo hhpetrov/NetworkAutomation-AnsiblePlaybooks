@@ -14,27 +14,19 @@
           - show route table KT_EPS044293T.inet.0
       register: all_commands_output
 
-    - name: Display all command outputs in structured format
-      ansible.builtin.debug:
-        msg: |
+    - name: Format output for all commands
+      set_fact:
+        formatted_output: |
           {
             "device": "{{ inventory_hostname }}",
-            "commands": [
-              {
-                "command": "show system information",
-                "output": {{ all_commands_output.stdout[0] | to_nice_yaml }}
-              },
-              {
-                "command": "show bgp summary instance KT_EPS044293T",
-                "output": {{ all_commands_output.stdout[1] | to_nice_yaml }}
-              },
-              {
-                "command": "show route summary table KT_EPS044293T.inet.0",
-                "output": {{ all_commands_output.stdout[2] | to_nice_yaml }}
-              },
-              {
-                "command": "show route table KT_EPS044293T.inet.0",
-                "output": {{ all_commands_output.stdout[3] | to_nice_yaml }}
-              }
-            ]
+            "outputs": {
+              "show system information": "{{ all_commands_output.stdout[0] | to_nice_yaml }}",
+              "show bgp summary instance KT_EPS044293T": "{{ all_commands_output.stdout[1] | to_nice_yaml }}",
+              "show route summary table KT_EPS044293T.inet.0": "{{ all_commands_output.stdout[2] | to_nice_yaml }}",
+              "show route table KT_EPS044293T.inet.0": "{{ all_commands_output.stdout[3] | to_nice_yaml }}"
+            }
           }
+
+    - name: Display formatted output
+      ansible.builtin.debug:
+        msg: "{{ formatted_output }}"
