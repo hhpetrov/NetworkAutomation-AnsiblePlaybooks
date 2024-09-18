@@ -16,6 +16,13 @@
         commands:
           - show interfaces ge-0/0/9.102
           - show interfaces terse ge-0/0/9.102
+      "192.168.75.116":
+        interface: "lt-1/1/0.104"
+        commands:
+          - show interfaces lt-1/1/0.104
+          - show interfaces terse lt-1/1/0.104
+          - show interfaces lt-1/1/0.105
+          - show interfaces terse lt-1/1/0.105
 
   tasks:
     - name: Display inventory hostname
