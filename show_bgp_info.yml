@@ -11,21 +11,21 @@
             - show system information
             - show bgp summary instance KT_EPS044293T
             - show route summary table KT_EPS044293T.inet.0
-			- show route table KT_EPS044293T.inet.0 
+            - show route table KT_EPS044293T.inet.0 
       "172.18.1.40":
         - interface: "ge-0/0/9.102"
           commands:
             - show system information
             - show bgp summary instance KT_EPS044293T
             - show route summary table KT_EPS044293T.inet.0
-			- show route table KT_EPS044293T.inet.0 
+            - show route table KT_EPS044293T.inet.0
       "192.168.75.116":
         - interface: "lt-1/1/0.104"
           commands:
             - show system information
             - show bgp summary instance KT_EPS044293T
             - show route summary table KT_EPS044293T.inet.0
-			- show route table KT_EPS044293T.inet.0 
+            - show route table KT_EPS044293T.inet.0 
  
       "172.18.24.9":
         - interface: "lt-0/0/0.103"
@@ -33,7 +33,7 @@
             - show system information
             - show bgp summary instance KT_EPS044293T
             - show route summary table KT_EPS044293T.inet.0
-			- show route table KT_EPS044293T.inet.0 
+            - show route table KT_EPS044293T.inet.0 
 
 
   tasks:
