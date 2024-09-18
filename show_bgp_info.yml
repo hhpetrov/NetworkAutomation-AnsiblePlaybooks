@@ -17,15 +17,20 @@
     - name: Display all command outputs
       ansible.builtin.debug:
         msg: |
-          Device: {{ inventory_hostname }}
-          Command: show system information
-          Output: {{ all_commands_output.stdout[0] }}
-          
-          Command: show bgp summary instance KT_EPS044293T
-          Output: {{ all_commands_output.stdout[1] }}
-
-          Command: show route summary table KT_EPS044293T.inet.0
-          Output: {{ all_commands_output.stdout[2] }}
-
-          Command: show route table KT_EPS044293T.inet.0
-          Output: {{ all_commands_output.stdout[3] }}
+          {
+            "item.stdout_lines": [
+              {{ all_commands_output.stdout_lines | to_nice_yaml }}
+            ],
+            "_ansible_verbose_always": true,
+            "_ansible_no_log": false,
+            "changed": false,
+            "item": {
+              "commands": [
+                "show system information",
+                "show bgp summary instance KT_EPS044293T",
+                "show route summary table KT_EPS044293T.inet.0",
+                "show route table KT_EPS044293T.inet.0"
+              ]
+            },
+            "ansible_loop_var": "item"
+          }
