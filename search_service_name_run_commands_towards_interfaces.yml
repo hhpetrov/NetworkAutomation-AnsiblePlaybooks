@@ -13,7 +13,7 @@
     - name: Retrieve routing instances for each device
       junipernetworks.junos.junos_command:
         commands:
-          - show configuration routing-instances
+          - show configuration routing-instances KT_EPS044293T
       register: routing_instances
       delegate_to: "{{ item }}"
       with_items: "{{ devices }}"
