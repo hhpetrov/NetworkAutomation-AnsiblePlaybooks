@@ -75,9 +75,7 @@
         msg: "Inventory hostname: {{ inventory_hostname }}"
 
     - name: Retrieve device hostname
-      junosnetworks.junos.junos_command:
-        commands:
-          - show version | match Hostname
+      command: ssh -o StrictHostKeyChecking=no {{ inventory_hostname }} 'show version | match Hostname'
       register: device_info
 
     - name: Extract the device hostname from the output
@@ -90,8 +88,7 @@
         msg: "Device: {{ device_hostname }}"
 
     - name: Run commands on specific interfaces
-      junosnetworks.junos.junos_command:
-        commands: "{{ item.commands }}"
+      command: ssh -o StrictHostKeyChecking=no {{ inventory_hostname }} 'show interfaces {{ item.interface}}'
       loop: "{{ device_interface_map[inventory_hostname] }}"
       register: interface_output
 
