@@ -1,70 +1,22 @@
 ---
-- name: Execute commands on devices and handle interfaces
+- name: Execute command on devices and display output
   hosts: junos_production_devices
   gather_facts: no
   connection: local
 
   vars:
-    predefined_service_name: "KT_EPS044293T"  
+    predefined_service_name: "KT_EPS044293T"  # Replace with your specific service name
 
   tasks:
     - name: Retrieve interface descriptions from each device
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces descriptions | match KT_EPS044293T
+          - show interfaces description | match "{{ predefined_service_name }}"
       register: interface_descriptions
 
     - name: Debug raw interface descriptions output
       ansible.builtin.debug:
-        msg: "{{ interface_descriptions.stdout_lines }}"
-
-    - name: Check if service name exists in output
-      set_fact:
-        service_interfaces: >-
-          {{
-            interface_descriptions.stdout_lines |
-            flatten |
-            select('search', predefined_service_name) |
-            map('regex_findall', '^(\\S+)\\s+') |
-            map('first') | list
-          }}
-      when: interface_descriptions.stdout_lines | length > 0
-
-    - name: Debug extracted service interfaces
-      ansible.builtin.debug:
-        msg: "Extracted interfaces: {{ service_interfaces }}"
-
-    - name: Fail if no interfaces are found for the predefined service
-      fail:
-        msg: "No interfaces found for the predefined service '{{ predefined_service_name }}'."
-      when: service_interfaces | length == 0
-
-    - name: Show details for each found interface
-      block:
-        - name: Show interface details
-          junipernetworks.junos.junos_command:
-            commands:
-              - show interfaces {{ item }}
-          register: interface_details
-          loop: "{{ service_interfaces }}"
-          when: service_interfaces | length > 0
-
-        - name: Show terse interface details
-          junipernetworks.junos.junos_command:
-            commands:
-              - show interfaces {{ item }} terse
-          register: terse_interface_details
-          loop: "{{ service_interfaces }}"
-          when: service_interfaces | length > 0
-
-    - name: Display detailed output for each interface
-      ansible.builtin.debug:
         msg: |
           Device: {{ inventory_hostname }}
-          Interface: {{ item }}
-          Detailed Output:
-          {{ interface_details.results[loop.index0].stdout_lines | join('\n') }}
-          Terse Output:
-          {{ terse_interface_details.results[loop.index0].stdout_lines | join('\n') }}
-      loop: "{{ service_interfaces }}"
-      when: interface_details.results | length > 0 and terse_interface_details.results | length > 0
+          Command Output:
+          {{ interface_descriptions.stdout_lines | join('\n') }}
