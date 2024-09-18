@@ -5,42 +5,27 @@
   connection: local
 
   tasks:
-    - name: Run 'show system information' command
+    - name: Run all commands
       junipernetworks.junos.junos_command:
         commands:
           - show system information
-      register: system_info_output
-
-    - name: Display the system information output
-      ansible.builtin.debug:
-        var: system_info_output.stdout_lines
-
-    - name: Run 'show bgp summary' command
-      junipernetworks.junos.junos_command:
-        commands:
           - show bgp summary instance KT_EPS044293T
-      register: bgp_summary_output
-
-    - name: Display the BGP summary output
-      ansible.builtin.debug:
-        var: bgp_summary_output.stdout_lines
-
-    - name: Run 'show route summary' command
-      junipernetworks.junos.junos_command:
-        commands:
           - show route summary table KT_EPS044293T.inet.0
-      register: route_summary_output
-
-    - name: Display the route summary output
-      ansible.builtin.debug:
-        var: route_summary_output.stdout_lines
-
-    - name: Run 'show route table' command
-      junipernetworks.junos.junos_command:
-        commands:
           - show route table KT_EPS044293T.inet.0
-      register: route_table_output
+      register: all_commands_output
 
-    - name: Display the route table output
+    - name: Display all command outputs
       ansible.builtin.debug:
-        var: route_table_output.stdout_lines
+        msg: |
+          Device: {{ inventory_hostname }}
+          Command: show system information
+          Output: {{ all_commands_output.stdout[0] }}
+          
+          Command: show bgp summary instance KT_EPS044293T
+          Output: {{ all_commands_output.stdout[1] }}
+
+          Command: show route summary table KT_EPS044293T.inet.0
+          Output: {{ all_commands_output.stdout[2] }}
+
+          Command: show route table KT_EPS044293T.inet.0
+          Output: {{ all_commands_output.stdout[3] }}
