@@ -1,14 +1,11 @@
 ---
-- name: Check VRF services and run commands on specific interfaces
-  hosts: localhost  # Runs locally as we are targeting remote devices via the connection
+- name: Execute commands on devices and handle interfaces
+  hosts: junos_production_devices
   gather_facts: no
   connection: local
 
   vars:
-    predefined_service_name: "KT_EPS044293T"  # Replace with your specific service name
-    devices:
-      - "172.18.3.13"
-      - "172.18.1.40"
+    predefined_service_name: "KT_EPS044293T"  
 
   tasks:
     - name: Retrieve interface descriptions from each device
@@ -19,20 +16,19 @@
 
     - name: Debug raw interface descriptions output
       ansible.builtin.debug:
-        msg: "{{ interface_descriptions.results | map(attribute='stdout_lines') | list }}"
+        msg: "{{ interface_descriptions.stdout_lines }}"
 
     - name: Extract interfaces related to predefined service
       set_fact:
         service_interfaces: >-
           {{
-            interface_descriptions.results | selectattr('stdout_lines', 'defined') | 
-            map(attribute='stdout_lines') | list | 
+            interface_descriptions.stdout_lines | 
             flatten | 
             select('search', predefined_service_name) | 
             map('regex_findall', '^(\\S+)\\s+') | 
             map('first') | list
           }}
-      when: interface_descriptions.results | length > 0
+      when: interface_descriptions.stdout_lines | length > 0
 
     - name: Fail if no interfaces are found for the predefined service
       fail:
