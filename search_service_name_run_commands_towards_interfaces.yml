@@ -11,7 +11,7 @@
     - name: Run command to match predefined service name
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces descriptions | match "{{ predefined_service_name }}"
+          - show interfaces descriptions | match KT_EPS044293T
       register: command_output
 
     - name: Display command output
