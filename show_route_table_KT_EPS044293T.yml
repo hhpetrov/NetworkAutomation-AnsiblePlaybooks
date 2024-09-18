@@ -23,4 +23,4 @@
 
     - name: Display the route table output
       ansible.builtin.debug:
-        var: system_info.stdout_lines,route_table.stdout_lines
+        var: route_table.stdout_lines
