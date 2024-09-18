@@ -1,5 +1,5 @@
 ---
-- name: Execute command on devices and display output
+- name: Execute command on devices and filter output
   hosts: junos_production_devices
   gather_facts: no
   connection: local
@@ -11,12 +11,22 @@
     - name: Retrieve interface descriptions from each device
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces descriptions | match "{{ predefined_service_name }}"
+          - show interfaces description
       register: interface_descriptions
 
-    - name: Debug raw interface descriptions output
+    - name: Filter output for predefined service name
+      set_fact:
+        filtered_output: >-
+          {{
+            interface_descriptions.stdout_lines |
+            flatten |
+            select('search', predefined_service_name) |
+            list
+          }}
+
+    - name: Display filtered output for each device
       ansible.builtin.debug:
         msg: |
           Device: {{ inventory_hostname }}
-          Command Output:
-          {{ interface_descriptions.stdout_lines | join('\n') }}
+          Filtered Command Output:
+          {{ filtered_output | join('\n') }}
