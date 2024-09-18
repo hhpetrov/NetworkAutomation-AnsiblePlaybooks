@@ -10,6 +10,10 @@
       "172.18.1.40": "ge-0/0/9.102"
 
   tasks:
+    - name: Display inventory hostname
+      ansible.builtin.debug:
+        msg: "Inventory hostname: {{ inventory_hostname }}"
+
     - name: Retrieve device hostname
       junipernetworks.junos.junos_command:
         commands:
@@ -25,10 +29,18 @@
       ansible.builtin.debug:
         msg: "Device: {{ device_hostname }}"
 
+    - name: Display device interface map
+      ansible.builtin.debug:
+        msg: "Device interface map: {{ device_interface_map }}"
+
+    - name: Display ansible_host
+      ansible.builtin.debug:
+        msg: "Ansible host: {{ ansible_host }}"
+
     - name: Check if the device is in the map
       ansible.builtin.set_fact:
-        interface_name: "{{ device_interface_map[inventory_hostname] }}"
-      when: inventory_hostname in device_interface_map
+        interface_name: "{{ device_interface_map[ansible_host] }}"
+      when: ansible_host in device_interface_map
 
     - name: Run 'show interfaces terse' command for the specific interface
       junipernetworks.junos.junos_command:
