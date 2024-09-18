@@ -5,6 +5,15 @@
   connection: local
 
   tasks:
+    - name: Run 'show system information' command
+      junipernetworks.junos.junos_command:
+        commands:
+          - show system information
+      register: system_info
+
+    - name: Display the system information
+      ansible.builtin.debug:
+        var: system_info.stdout_lines
     - name: Run 'show route summary table KT_EPS044293T.inet.0' command
       junipernetworks.junos.junos_command:
         commands:
