@@ -11,14 +11,8 @@
     - name: Run command to retrieve interface descriptions
       junipernetworks.junos.junos_command:
         commands:
-          - show interfaces description
+          - show interfaces descriptions
       register: command_output
-
-    - name: Display raw command output
-      ansible.builtin.debug:
-        msg: |
-          Raw Command Output:
-          {{ command_output.stdout_lines | flatten | join('\n') }}
 
     - name: Filter command output to include only lines with the predefined service name
       set_fact:
@@ -33,10 +27,41 @@
     - name: Display filtered command output
       ansible.builtin.debug:
         msg: |
+          Device: {{ inventory_hostname }}
           Filtered Command Output:
           {{ filtered_output | join('\n') }}
 
-    - name: Check if any interfaces were found
-      fail:
-        msg: "No interfaces found for the predefined service '{{ predefined_service_name }}'."
-      when: filtered_output | length == 0
+    - name: Extract interfaces from filtered output
+      set_fact:
+        interfaces: >-
+          {{
+            filtered_output |
+            select('search', 'ge-|xe-|et-|ae-') |  # Adjust this regex as needed to match your interfaces
+            map('regex_replace', '.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') |
+            list
+          }}
+
+    - name: Display extracted interfaces
+      ansible.builtin.debug:
+        msg: |
+          Extracted Interfaces:
+          {{ interfaces | join('\n') }}
+
+    - name: Run additional commands on found interfaces
+      junipernetworks.junos.junos_command:
+        commands:
+          - "{{ item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }}"
+          - "{{ item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }} terse"
+        with_items: "{{ filtered_output }}"
+        register: additional_commands_output
+
+    - name: Display additional commands output
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ inventory_hostname }}
+          Additional Commands Output:
+          {% for result in additional_commands_output.results %}
+            Interface: {{ result.item | regex_replace('.*(ge-|xe-|et-|ae-[0-9/]+).*', '\\1') | default('') }}
+            Command Output:
+            {{ result.stdout_lines | join('\n') }}
+          {% endfor %}
