@@ -9,13 +9,13 @@
       "172.18.3.13":
         interface: "ge-0/0/9.102"
         commands:
-          - show interfaces ge-0/0/9.102
-          - show interfaces terse ge-0/0/9.102
+          - show interfaces
+          - show interfaces terse
       "172.18.1.40":
         interface: "ge-0/0/9.102"
         commands:
-          - show interfaces ge-0/0/9.102
-          - show interfaces terse ge-0/0/9.102
+          - show interfaces
+          - show interfaces terse
 
   tasks:
     - name: Display inventory hostname
@@ -48,12 +48,24 @@
       register: command_outputs
       when: interface_info is defined
 
-    - name: Display output for each command
+    - name: Filter and display output for 'show interfaces'
       ansible.builtin.debug:
         msg: |
           Device: {{ device_hostname }}
-          {% for command_output in command_outputs.stdout_lines %}
-          Output:
-          {{ command_output | join('\n') if command_output is defined else 'No output' }}
-          {% endfor %}
-      when: command_outputs is defined
+          Show Interfaces:
+          {% if command_outputs.stdout_lines[0] is defined %}
+          {{ command_outputs.stdout_lines[0] | regex_search('.*{{ interface_info.interface }}.*', multiline=True) | join('\n') if command_outputs.stdout_lines[0] | regex_search('.*{{ interface_info.interface }}.*', multiline=True) is defined else 'No output' }}
+          {% else %}
+          No output
+          {% endif %}
+
+    - name: Filter and display output for 'show interfaces terse'
+      ansible.builtin.debug:
+        msg: |
+          Device: {{ device_hostname }}
+          Show Interfaces Terse:
+          {% if command_outputs.stdout_lines[1] is defined %}
+          {{ command_outputs.stdout_lines[1] | regex_search('.*{{ interface_info.interface }}.*', multiline=True) | join('\n') if command_outputs.stdout_lines[1] | regex_search('.*{{ interface_info.interface }}.*', multiline=True) is defined else 'No output' }}
+          {% else %}
+          No output
+          {% endif %}
