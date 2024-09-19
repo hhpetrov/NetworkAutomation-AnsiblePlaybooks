@@ -84,6 +84,9 @@
             - show interfaces terse lt-1/0/0.304
 
   tasks:
+    - name: Disable color output
+      ansible.builtin.set_fact:
+        ANSIBLE_NOCOLOR: "1"
     - name: Display inventory hostname
       debug:
         msg: "Inventory hostname: {{ inventory_hostname }}"
