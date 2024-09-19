@@ -2,6 +2,8 @@
   hosts: all
   gather_facts: no
   connection: local
+  environment:
+    ANSIBLE_FORCE_COLOR: false
 
   vars:
     device_interface_map:
