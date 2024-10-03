@@ -1,12 +1,12 @@
 ---
-- name: Traceroute from source to destination with routing instance KT_EPS044293T
+- name: Traceroute from source to destination with specified routing instance
   hosts: "{{ inventory_hostname }}"
   gather_facts: no
   connection: local
   vars:
-    src_ip: "{{ src_ip_address_variable }}"      # Source IP
-    dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }} "
+    src_ip: "{{ src_ip_address_variable }}"        # Source IP
+    dest_ip: "{{ dest_ip_address_variable }}"      # Destination IP
+    service_name: "{{ service_name }}"     # Routing instance name
   tasks:
     - name: Run traceroute command
       junipernetworks.junos.junos_command:
@@ -17,3 +17,11 @@
     - name: Display traceroute results
       debug:
         var: traceroute_output.stdout_lines
+
+    - name: Display traceroute errors (if any)
+      debug:
+        var: traceroute_output.stderr
+
+    - name: Display full traceroute output for debugging
+      debug:
+        var: traceroute_output
