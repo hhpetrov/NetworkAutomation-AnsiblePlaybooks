@@ -10,7 +10,7 @@
     - name: Run ping command
       junipernetworks.junos.junos_command:
         commands:
-          - "ping {{ dest_ip }} source {{ src_ip }} routing-instance KT_EPS044293T"
+          - "ping routing-instance KT_EPS044293T count 20 source {{ src_ip }} {{ dest_ip }}"
       register: ping_output
 
     - name: Display ping results
