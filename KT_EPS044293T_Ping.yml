@@ -1,23 +1,12 @@
 ---
 - name: Ping from source to destination with routing instance KT_EPS044293T
-  hosts: "{{ target_device_ip }}"
+  hosts: "{{ inventory_hostname }}"
   gather_facts: no
   connection: local
   vars:
-    device_map:
-      "EPHK-CHW02-0101-AX01-067": "172.18.3.13"
-      "EPHK-CHW03-0501-AX01-022": "172.18.1.40"
-      "EPDE-FRA01-0101-MX01-001": "192.168.75.116"
-      "EPUS-LAX01-0102-MX01-018": "172.18.24.9"
-    input_device: "{{ device_input_variable }}"  # Input device name or IP
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
   tasks:
-    - name: Validate input device
-      set_fact:
-        target_device_ip: "{{ input_device if input_device in device_map.values() else device_map[input_device] }}"
-      when: input_device in device_map.keys() or input_device in device_map.values()
-
     - name: Run ping command
       junipernetworks.junos.junos_command:
         commands:
