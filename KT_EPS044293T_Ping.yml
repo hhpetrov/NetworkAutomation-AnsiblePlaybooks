@@ -6,7 +6,7 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }}
+    service_name: "{{ service_name }} "
   tasks:
     - name: Run ping command
       junipernetworks.junos.junos_command:
