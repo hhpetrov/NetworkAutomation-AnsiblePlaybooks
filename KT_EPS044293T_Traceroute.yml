@@ -6,11 +6,12 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
+    service_name: "{{ service_name }}
   tasks:
     - name: Run traceroute command
       junipernetworks.junos.junos_command:
         commands:
-          - "traceroute routing-instance KT_EPS044293T source {{ src_ip }} {{ dest_ip }}"
+          - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
       register: traceroute_output
 
     - name: Display traceroute results

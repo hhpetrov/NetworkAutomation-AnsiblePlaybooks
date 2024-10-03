@@ -6,11 +6,12 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
+    service_name: "{{ service_name }}
   tasks:
     - name: Run ping command
       junipernetworks.junos.junos_command:
         commands:
-          - "ping routing-instance KT_EPS044293T count 20 source {{ src_ip }} {{ dest_ip }}"
+          - "ping routing-instance {{ service_name }} count 20 source {{ src_ip }} {{ dest_ip }}"
       register: ping_output
 
     - name: Display ping results
