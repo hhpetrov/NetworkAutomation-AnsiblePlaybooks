@@ -1,19 +1,11 @@
 ---
 - name: Traceroute from source to destination with specified routing instance
-  hosts: "{{ inventory_hostname }}"
+  hosts: 172.18.3.13
   gather_facts: no
   connection: local
-  vars:
-    src_ip: "{{ src_ip_address_variable }}"        # Source IP
-    dest_ip: "{{ dest_ip_address_variable }}"      # Destination IP
-    service_name: "{{ service_name }}"              # Routing instance name
+
   tasks:
-    - name: Check variable values
-      debug:
-        msg:
-          - "Source IP: {{ src_ip }}"
-          - "Destination IP: {{ dest_ip }}"
-          - "Service Name: {{ service_name }}"
+    
 
     - name: Run traceroute command
       junipernetworks.junos.junos_command:
@@ -24,10 +16,6 @@
     - name: Display traceroute results
       debug:
         var: traceroute_output.stdout_lines
-
-    - name: Display traceroute errors (if any)
-      debug:
-        var: traceroute_output.stderr
 
     - name: Display full traceroute output for debugging
       debug:
