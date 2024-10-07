@@ -1,6 +1,6 @@
 ---
 - name: Ping from source to destination with routing instance
-  hosts: "{{ inventory_hostname }}"
+  hosts: 172.18.3.13
   gather_facts: no
   connection: local
 
