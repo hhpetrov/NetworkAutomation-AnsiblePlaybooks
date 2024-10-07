@@ -1,18 +1,54 @@
 ---
-- name: Execute traceroute on Juniper devices
-  hosts: 172.18.3.13  # This is the group of devices; adjust as necessary
+- name: Execute traceroute on Juniper devices with input validation and checks
+  hosts: {{ inventory_hostname }}
   gather_facts: no
   connection: local
+  vars:
+    ansible_network_os: junipernetworks.junos.junos
 
   tasks:
-    - name: Execute traceroute command
+    - name: Check if service_name is provided
+      fail:
+        msg: "Service name is required."
+      when: service_name is not defined or service_name == ""
+
+    - name: Check if source IP is provided
+      fail:
+        msg: "Source IP address is required."
+      when: src_ip_address_variable is not defined or src_ip_address_variable == ""
+
+    - name: Check if destination IP is provided
+      fail:
+        msg: "Destination IP address is required."
+      when: dest_ip_address_variable is not defined or dest_ip_address_variable == ""
+
+    - name: Check if destination and source IPs are valid (optional improvement)
+      assert:
+        that:
+          - "'{{ src_ip_address_variable }}' is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')"
+          - "'{{ dest_ip_address_variable }}' is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')"
+        fail_msg: "Invalid IP address format for source or destination."
+
+    - name: Execute traceroute command on Juniper device
       junipernetworks.junos.junos_command:
         commands:
           - "traceroute routing-instance {{ service_name }} source {{ src_ip_address_variable }} {{ dest_ip_address_variable }}"
+        timeout: 60  # Adjust the timeout as needed for large traceroutes
       register: traceroute_output
-      vars:
-        ansible_network_os: junipernetworks.junos.junos
+      failed_when: traceroute_output.failed or traceroute_output is not defined or traceroute_output.stdout == ""
+      changed_when: false
 
-    - name: Display traceroute results
+    - name: Display raw traceroute output
+      debug:
+        msg: 
+          - "stdout: {{ traceroute_output.stdout }}"
+          - "stderr: {{ traceroute_output.stderr | default('') }}"
+
+    - name: Display traceroute output line by line
       debug:
         var: traceroute_output.stdout_lines
+
+    - name: Fail if traceroute command returns empty output
+      fail:
+        msg: "Traceroute command returned empty output or failed to execute."
+      when: traceroute_output.stdout == "" or traceroute_output is not defined
