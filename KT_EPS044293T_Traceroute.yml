@@ -1,24 +1,17 @@
----
-- name: Execute traceroute using RPC XML format
+- name: Execute Traceroute on Juniper Router
   hosts: "{{ inventory_hostname }}"
   gather_facts: no
+  connection: local
   tasks:
-    - name: Run traceroute using proper RPC XML
+    - name: Run traceroute
       junipernetworks.junos.junos_rpc:
         rpc: "traceroute"
-        kwargs:
-          format: xml
-        # The `args` here are written in XML format directly within an inline string.
-        # `source` and `destination` are passed as sub-elements of `traceroute`.
-        args: |
-          <traceroute>
-            <no-resolve/>
-            <routing-instance>{{ service_name }}</routing-instance>
-            <source>{{ source_ip }}</source>
-            <destination>{{ destination_ip }}</destination>
-          </traceroute>
-      register: traceroute_output
+        args:
+          routing-instance: "{{ routing_instance }}"
+          source: "{{ source_ip }}"
+          destination: "{{ destination_ip }}"
+        register: traceroute_result
 
     - name: Display traceroute output
       debug:
-        var: traceroute_output.stdout_lines
+        var: traceroute_result.stdout_lines
