@@ -6,8 +6,15 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"        # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"      # Destination IP
-    service_name: "{{ service_name }}"     # Routing instance name
+    service_name: "{{ service_name }}"              # Routing instance name
   tasks:
+    - name: Check variable values
+      debug:
+        msg:
+          - "Source IP: {{ src_ip }}"
+          - "Destination IP: {{ dest_ip }}"
+          - "Service Name: {{ service_name }}"
+
     - name: Run traceroute command
       junipernetworks.junos.junos_command:
         commands:
