@@ -6,22 +6,29 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }} "
+    service_name: "{{ service_name }}"
+
   tasks:
-    - name: Run traceroute command
-      junipernetworks.junos.junos_command:
-        commands:
-          - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
+    - name: Run traceroute command with routing instance
+      junipernetworks.junos.junos_rpc:
+        rpc: traceroute
+        kwargs:
+          routing_instance: "{{ service_name }}"
+          source: "{{ src_ip }}"
+          destination: "{{ dest_ip }}"
       register: traceroute_output
-    - name: Run traceroute 172.18.24.33
-      junipernetworks.junos.junos_command:
-        commands:
-          - "traceroute 172.18.24.33"
+
+    - name: Run traceroute to a specific IP
+      junipernetworks.junos.junos_rpc:
+        rpc: traceroute
+        kwargs:
+          destination: "172.18.24.33"
       register: traceroute2_output
 
-    - name: Display traceroute results
+    - name: Display traceroute results for routing instance
       debug:
-        var: traceroute_output.stdout_lines
-    - name: Display traceroute results
+        var: traceroute_output
+
+    - name: Display traceroute results for specific IP
       debug:
-        var: traceroute2_output.stdout_lines
+        var: traceroute2_output
