@@ -1,17 +1,18 @@
 ---
-- name: Ping from source to destination with routing instance
-  hosts: 172.18.3.13
+- name: Execute traceroute on Juniper devices
+  hosts: 172.18.3.13  # This is the group of devices; adjust as necessary
   gather_facts: no
   connection: local
 
   tasks:
+    - name: Execute traceroute command
+      junipernetworks.junos.junos_command:
+        commands:
+          - "traceroute routing-instance {{ service_name }} source {{ source_ip }} {{ destination_ip }}"
+      register: traceroute_output
+      vars:
+        ansible_network_os: junipernetworks.junos.junos
 
-    - name: Run traceroute to a specific IP
-      junipernetworks.junos.junos_rpc:
-        rpc: traceroute
-        args:
-            destination: "172.18.24.33"
-      register: traceroute2_output
-    - name: Display traceroute results for specific IP
+    - name: Display traceroute results
       debug:
-        var: traceroute2_output
+        var: traceroute_output.stdout_lines
