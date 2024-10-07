@@ -12,23 +12,17 @@
     - name: Run traceroute command with routing instance
       junipernetworks.junos.junos_rpc:
         rpc: traceroute
-        args:
-          # The routing-instance should be specified inside a subtree filter
-          filter: 
-            traceroute:
-              routing-instance: "{{ service_name }}"
-              source: "{{ src_ip }}"
-              destination: "{{ dest_ip }}"
+        args: 
+          - routing-instance="{{ service_name }}"
+          - source="{{ src_ip }}"
+          - destination="{{ dest_ip }}"
       register: traceroute_output
 
     - name: Run traceroute to a specific IP
       junipernetworks.junos.junos_rpc:
         rpc: traceroute
-        args:
-          # This command also needs to be specified correctly
-          filter:
-            traceroute:
-              destination: "172.18.24.33"
+        args: 
+          - destination="172.18.24.33"
       register: traceroute2_output
 
     - name: Display traceroute results for routing instance
