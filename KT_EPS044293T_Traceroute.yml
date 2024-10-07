@@ -26,7 +26,7 @@
     - name: Execute traceroute command on Juniper device
       junipernetworks.junos.junos_command:
         commands:
-          - "traceroute routing-instance {{ service_name }} source {{ src_ip_address_variable }} {{ dest_ip_address_variable }}"
+          - "traceroute routing-instance {{ service_name }} source {{ src_ip_address_variable }} {{ dest_ip_address_variable }} ttl 20"
       register: traceroute_output
       failed_when: traceroute_output.failed or traceroute_output is not defined or traceroute_output.stdout == ""
       changed_when: false
