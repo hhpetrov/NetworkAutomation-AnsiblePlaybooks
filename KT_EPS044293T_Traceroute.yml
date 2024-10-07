@@ -9,7 +9,6 @@
         args:
           routing-instance: "{{ routing_instance }}"
           source: "{{ source_ip }}"
-          destination: "{{ destination_ip }}"
         output: xml
 
     - name: Display traceroute output
