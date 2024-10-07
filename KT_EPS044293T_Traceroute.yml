@@ -13,7 +13,15 @@
         commands:
           - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
       register: traceroute_output
+    - name: Run traceroute 8.8.8.8
+      junipernetworks.junos.junos_command:
+        commands:
+          - "traceroute 8.8.8.8"
+      register: traceroute2_output
 
     - name: Display traceroute results
       debug:
         var: traceroute_output.stdout_lines
+    - name: Display traceroute results
+      debug:
+        var: traceroute2_output.stdout_lines
