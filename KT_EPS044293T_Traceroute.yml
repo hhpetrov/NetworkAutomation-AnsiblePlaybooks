@@ -10,7 +10,7 @@
           routing-instance: "{{ routing_instance }}"
           source: "{{ source_ip }}"
           destination: "{{ destination_ip }}"
-        register: traceroute_result
+        output: traceroute_result
 
     - name: Display traceroute output
       debug:
