@@ -7,7 +7,7 @@
     - name: Run traceroute in the specified routing-instance
       junipernetworks.junos.junos_rpc:
         rpc: "traceroute"
-        kwargs:
+        args:
           routing-instance: "{{ service_name }}"
           source: "{{ src_ip_address_variable }}"
           destination: "{{ dest_ip_address_variable }}"
