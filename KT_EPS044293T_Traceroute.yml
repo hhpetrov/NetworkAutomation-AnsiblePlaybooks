@@ -3,10 +3,6 @@
   hosts: "{{ inventory_hostname }}"
   gather_facts: no
   connection: local
-  vars:
-    src_ip: "{{ src_ip_address_variable }}"      # Source IP
-    dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }}"
 
   tasks:
 
