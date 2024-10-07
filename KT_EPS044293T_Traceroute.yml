@@ -9,16 +9,6 @@
     service_name: "{{ service_name }}"
 
   tasks:
-    - name: Run traceroute command with routing instance
-      junipernetworks.junos.junos_rpc:
-        rpc: traceroute
-        args: 
-          filter: 
-            traceroute:
-              routing-instance: "{{ service_name }}"
-              source: "{{ src_ip }}"
-              destination: "{{ dest_ip }}"
-      register: traceroute_output
 
     - name: Run traceroute to a specific IP
       junipernetworks.junos.junos_rpc:
@@ -28,11 +18,6 @@
             traceroute:
               destination: "172.18.24.33"
       register: traceroute2_output
-
-    - name: Display traceroute results for routing instance
-      debug:
-        var: traceroute_output
-
     - name: Display traceroute results for specific IP
       debug:
         var: traceroute2_output
