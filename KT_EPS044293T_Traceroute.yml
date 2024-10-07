@@ -22,12 +22,6 @@
         msg: "Destination IP address is required."
       when: dest_ip_address_variable is not defined or dest_ip_address_variable == ""
 
-    - name: Check if destination and source IPs are valid (optional improvement)
-      assert:
-        that:
-          - "'{{ src_ip_address_variable }}' is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')"
-          - "'{{ dest_ip_address_variable }}' is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')"
-        fail_msg: "Invalid IP address format for source or destination."
 
     - name: Execute traceroute command on Juniper device
       junipernetworks.junos.junos_command:
