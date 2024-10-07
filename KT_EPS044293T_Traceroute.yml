@@ -6,14 +6,22 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }} "
+    service_name: "{{ service_name }}"
+
   tasks:
-    - name: Run ping command
-      junipernetworks.junos.junos_command:
-        commands:
-          - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
+    - name: Debug service name
+      debug:
+        var: service_name
+
+    - name: Show constructed traceroute command
+      debug:
+        msg: "Executing command: traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
+
+    - name: Run traceroute command using command module
+      command: >
+        traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}
       register: traceroute_output
 
-    - name: Display traceroute results
+    - name: Display full traceroute output
       debug:
-        var: traceroute_output.stdout_lines
+        var: traceroute_output
