@@ -6,39 +6,14 @@
   vars:
     src_ip: "{{ src_ip_address_variable }}"      # Source IP
     dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }}"
-
+    service_name: "{{ service_name }} "
   tasks:
-    - name: Show constructed traceroute command
-      debug:
-        msg: "Executing command: traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
-
     - name: Run traceroute command
-      junipernetworks.junos.junos_command:
+      juniper.device.command:
         commands:
           - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
       register: traceroute_output
 
-    - name: Display full traceroute output
+    - name: Display traceroute results
       debug:
-        var: traceroute_output
-
-    - name: Test basic command
-      junipernetworks.junos.junos_command:
-        commands:
-          - "show version"
-      register: version_output
-
-    - name: Display version output
-      debug:
-        var: version_output
-
-    - name: Show routing instances
-      junipernetworks.junos.junos_command:
-        commands:
-          - "show configuration routing-instances"
-      register: routing_instances_output
-
-    - name: Display routing instances
-      debug:
-        var: routing_instances_output
+        var: traceroute_output.stdout_lines
