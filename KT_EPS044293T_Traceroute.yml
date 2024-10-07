@@ -8,7 +8,7 @@
     - name: Execute traceroute command
       junipernetworks.junos.junos_command:
         commands:
-          - "traceroute routing-instance {{ service_name }} source {{ source_ip }} {{ destination_ip }}"
+          - "traceroute routing-instance {{ service_name }} source {{ src_ip_address_variable }} {{ dest_ip_address_variable }}"
       register: traceroute_output
       vars:
         ansible_network_os: junipernetworks.junos.junos
