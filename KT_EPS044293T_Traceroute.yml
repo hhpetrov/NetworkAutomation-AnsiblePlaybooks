@@ -1,22 +1,19 @@
 ---
-- name: Traceroute from source to destination with specified routing instance
-  hosts: 172.18.3.13
+- name: Ping from source to destination with routing instance
+  hosts: "{{ inventory_hostname }}"
   gather_facts: no
   connection: local
-
+  vars:
+    src_ip: "{{ src_ip_address_variable }}"      # Source IP
+    dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
+    service_name: "{{ service_name }} "
   tasks:
-    
-
-    - name: Run traceroute command
+    - name: Run ping command
       junipernetworks.junos.junos_command:
         commands:
-          - "traceroute routing-instance KT_EPS044293T source 10.236.128.178 10.236.128.186"
+          - "traceroute routing-instance {{ service_name }} source {{ src_ip }} {{ dest_ip }}"
       register: traceroute_output
 
     - name: Display traceroute results
       debug:
         var: traceroute_output.stdout_lines
-
-    - name: Display full traceroute output for debugging
-      debug:
-        var: traceroute_output
