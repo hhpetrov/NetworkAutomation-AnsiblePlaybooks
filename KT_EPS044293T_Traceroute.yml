@@ -6,6 +6,7 @@
       junipernetworks.junos.junos_command:
         commands:
           - "traceroute routing-instance {{ routing_instance }} source {{ source_ip }} {{ destination_ip }}"
+        waitfor: 40
       register: traceroute_result
 
     - name: Display raw stdout
