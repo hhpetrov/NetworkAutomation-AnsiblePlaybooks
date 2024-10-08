@@ -1,18 +1,20 @@
-- name: Execute Traceroute on Juniper Router
-  hosts: "{{ inventory_hostname }}"
-  gather_facts: no
-  connection: local
-  tasks:
-    - name: Run traceroute
-      junipernetworks.junos.junos_rpc:
-        rpc: "traceroute"
-        args:
-          routing-instance: "{{ routing_instance }}"
-          source: "{{ source_ip }}"
-          host: "{{ destination_ip }}"
-        output: text
-      register: traceroute_result
+- name: Run traceroute
+  junipernetworks.junos.junos_rpc:
+    rpc: "traceroute"
+    args:
+      routing-instance: "{{ routing_instance | default(omit) }}"
+      source: "{{ source_ip }}"
+      host: "{{ destination_ip }}"
+    output: text
+  register: traceroute_result
+  ignore_errors: yes
 
-    - name: Display traceroute output
-      debug:
-        var: traceroute_result
+- name: Check if traceroute returned any output
+  fail:
+    msg: "No output returned from traceroute"
+  when: traceroute_result is not defined or traceroute_result.rpc_reply is not defined
+
+- name: Display traceroute output
+  debug:
+    var: traceroute_result.rpc_reply.text
+  when: traceroute_result.rpc_reply is defined
