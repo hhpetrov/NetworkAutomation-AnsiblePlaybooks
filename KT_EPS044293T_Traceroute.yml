@@ -10,7 +10,7 @@
           routing-instance: "{{ routing_instance }}"
           source: "{{ source_ip }}"
           host: "{{ destination_ip }}"
-        output: xml
+        output: text
       register: traceroute_result
 
     - name: Display traceroute output
@@ -19,7 +19,7 @@
 
     - name: Parse traceroute output
       community.general.xml:
-        xmlstring: "{{ traceroute_result.stdout_lines }}"
+        xmlstring: "{{ traceroute_result.stdout }}"
         register: parsed_traceroute
 
     - name: Display parsed traceroute output
