@@ -16,13 +16,3 @@
     - name: Display traceroute output
       debug:
         var: traceroute_result
-    - name: Parse JSON/XML output
-      community.general.json_query:
-        data: "{{ traceroute_result.result }}"
-        query: "your_json_query"  # Replace with your JSON query
-      register: parsed_traceroute
-    
-    - name: Display parsed traceroute output
-      debug:
-        var: parsed_traceroute
-    
