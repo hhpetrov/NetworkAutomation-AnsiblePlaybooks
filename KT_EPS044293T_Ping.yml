@@ -4,9 +4,9 @@
   gather_facts: no
   connection: local
   vars:
-    src_ip: "{{ src_ip_address_variable }}"      # Source IP
-    dest_ip: "{{ dest_ip_address_variable }}"    # Destination IP
-    service_name: "{{ service_name }} "
+    src_ip: "{{ source_ip }}"      # Source IP
+    dest_ip: "{{ destination_ip }}"    # Destination IP
+    service_name: "{{ routing_instance}} "
   tasks:
     - name: Run ping command
       junipernetworks.junos.junos_command:
