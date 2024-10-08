@@ -10,18 +10,10 @@
           routing-instance: "{{ routing_instance }}"
           source: "{{ source_ip }}"
           host: "{{ destination_ip }}"
-        output: text
+        output: ascii
       register: traceroute_result
 
     - name: Display traceroute output
       debug:
         var: traceroute_result
 
-    - name: Parse traceroute output
-      community.general.xml:
-        xmlstring: "{{ traceroute_result.stdout }}"
-        register: parsed_traceroute
-
-    - name: Display parsed traceroute output
-      debug:
-        var: parsed_traceroute.results
