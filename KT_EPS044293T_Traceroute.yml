@@ -15,7 +15,7 @@
 
     - name: Display traceroute output
       debug:
-        var: traceroute_result.stdout_lines
+        var: traceroute_result
 
     - name: Parse traceroute output
       community.general.xml:
