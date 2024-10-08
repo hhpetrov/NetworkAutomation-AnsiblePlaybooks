@@ -9,6 +9,10 @@
         wait_for: 60
       register: traceroute_result
 
-    - name: Display traceroute output
+    - name: Display raw stdout
       debug:
-        var: traceroute_result
+        var: traceroute_result.stdout
+
+    - name: Display raw stderr
+      debug:
+        var: traceroute_result.stderr
