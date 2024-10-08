@@ -1,12 +1,16 @@
 - name: Execute Traceroute on Juniper Router
   hosts: "{{ inventory_hostname }}"
   gather_facts: no
+  connection: local
   tasks:
     - name: Run traceroute
-      junipernetworks.junos.junos_command:
-        commands:
-          - "traceroute routing-instance {{ routing_instance }} source {{ source_ip }} {{ destination_ip }}"
-        waitfor : 300
+      junipernetworks.junos.junos_rpc:
+        rpc: "traceroute"
+        args:
+          routing-instance: "{{ routing_instance }}"
+          source: "{{ source_ip }}"
+          host: "{{ destination_ip }}"
+        output: json
       register: traceroute_result
 
     - name: Display traceroute output
