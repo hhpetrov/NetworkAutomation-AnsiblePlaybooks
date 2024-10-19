@@ -8,18 +8,9 @@
     - name: Run 'show system information' command
       junipernetworks.junos.junos_command:
         commands:
-          - show system information | match Hostname
+          - show system information
       register: system_info
 
-    - name: Display the system information
+    - name: Display the raw system information output
       ansible.builtin.debug:
-        var: system_info.stdout_lines
-    - name: Run 'show route summary table KT_EPS044293T.inet.0' command
-      junipernetworks.junos.junos_command:
-        commands:
-          - show route summary table KT_EPS044293T.inet.0
-      register: command_output
-
-    - name: Display the command output
-      ansible.builtin.debug:
-        var: command_output.stdout_lines
+        var: system_info
