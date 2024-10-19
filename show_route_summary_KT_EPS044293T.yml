@@ -16,6 +16,8 @@
         device_hostname: "{{ item.split(': ')[1] }}"
       loop: "{{ system_info.stdout_lines[0] }}"
       when: "'Hostname' in item"
+      loop_control:
+        label: "{{ 'Extracting Hostname' }}"  # Custom label to reduce verbosity
 
     - name: Display the hostname
       ansible.builtin.debug:
