@@ -17,6 +17,11 @@
       loop: "{{ system_info.stdout_lines }}"
       when: "'Hostname' in item"
 
+    - name: Ensure device_hostname is defined
+      ansible.builtin.fail:
+        msg: "Hostname not found in system information"
+      when: device_hostname is not defined
+
     - name: Display the hostname
       ansible.builtin.debug:
         msg: "Hostname: {{ device_hostname }}"
