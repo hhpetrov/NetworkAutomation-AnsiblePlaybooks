@@ -11,6 +11,10 @@
           - show system information
       register: system_info
 
+    - name: Debug system information output
+      ansible.builtin.debug:
+        var: system_info.stdout_lines
+
     - name: Extract the hostname from system information
       set_fact:
         device_hostname: "{{ item.split(': ')[1] }}"
