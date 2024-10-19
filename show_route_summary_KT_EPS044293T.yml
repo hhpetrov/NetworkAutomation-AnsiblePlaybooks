@@ -11,9 +11,16 @@
           - show system information
       register: system_info
 
-    - name: Display the system information
+    - name: Extract the hostname from system information
+      set_fact:
+        device_hostname: "{{ item.split(': ')[1] }}"
+      loop: "{{ system_info.stdout_lines }}"
+      when: "'Hostname' in item"
+
+    - name: Display the hostname
       ansible.builtin.debug:
-        var: system_info.stdout_lines
+        msg: "Hostname: {{ device_hostname }}"
+
     - name: Run 'show route summary table KT_EPS044293T.inet.0' command
       junipernetworks.junos.junos_command:
         commands:
