@@ -11,20 +11,11 @@
           - show system information
       register: system_info
 
-    - name: Debug system information output
-      ansible.builtin.debug:
-        var: system_info.stdout_lines
-
     - name: Extract the hostname from system information
       set_fact:
         device_hostname: "{{ item.split(': ')[1] }}"
       loop: "{{ system_info.stdout_lines }}"
-      when: "'Hostname' in item"
-
-    - name: Ensure device_hostname is defined
-      ansible.builtin.fail:
-        msg: "Hostname not found in system information"
-      when: device_hostname is not defined
+      when: "'Hostname:' in item"
 
     - name: Display the hostname
       ansible.builtin.debug:
