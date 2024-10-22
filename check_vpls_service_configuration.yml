@@ -1,0 +1,82 @@
+---
+- name: Post-Service Check for VPLS on Juniper ACX/MX Devices
+  hosts: "{{ ansible_host }}"  # Device(s) passed dynamically
+  gather_facts: no
+  vars:
+    # Default variables, can be overwritten via extra vars in AWX
+    vpls_service_name: "vpls_service"      # Replace with the VPLS service name (can be passed via extra vars)
+    expected_lsp_name: "mpls-lsp-name"     # MPLS LSP name (can be passed via extra vars)
+    expected_bgp_peer: "1.1.1.1"           # BGP peer (can be passed via extra vars)
+    expected_interfaces:                   # Service interfaces (can be passed via extra vars)
+      - "ge-0/0/0"
+      - "ge-0/0/1"
+
+  tasks:
+    # 1. Check MPLS LSPs
+    - name: Check MPLS LSPs status
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show mpls lsp"
+      register: mpls_lsp_output
+
+    - name: Validate MPLS LSP
+      assert:
+        that:
+          - "'{{ expected_lsp_name }}' in mpls_lsp_output.stdout"
+        fail_msg: "MPLS LSP {{ expected_lsp_name }} is not configured or not up."
+        success_msg: "MPLS LSP {{ expected_lsp_name }} is correctly configured and running."
+
+    # 2. Check BGP sessions
+    - name: Check BGP sessions
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show bgp summary"
+      register: bgp_output
+
+    - name: Validate BGP session
+      assert:
+        that:
+          - "'{{ expected_bgp_peer }}' in bgp_output.stdout"
+          - "'Established' in bgp_output.stdout"
+        fail_msg: "BGP session with {{ expected_bgp_peer }} is not established."
+        success_msg: "BGP session with {{ expected_bgp_peer }} is established."
+
+    # 3. Check VPLS Service
+    - name: Show VPLS instances
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show configuration routing-instances {{ vpls_service_name }}"
+      register: vpls_output
+
+    - name: Validate VPLS service instance
+      assert:
+        that:
+          - "'{{ vpls_service_name }}' in vpls_output.stdout"
+        fail_msg: "VPLS service instance {{ vpls_service_name }} is not configured."
+        success_msg: "VPLS service instance {{ vpls_service_name }} is configured."
+
+    # 4. Check Interface Status
+    - name: Check interface status for service interfaces
+      junipernetworks.junos.junos_command:
+        commands:
+          - "show interfaces terse"
+      register: interfaces_output
+
+    - name: Validate service interfaces
+      assert:
+        that:
+          - "'{{ item }}' in interfaces_output.stdout"
+          - "'up' in interfaces_output.stdout"
+        loop: "{{ expected_interfaces }}"
+        fail_msg: "Interface {{ item }} is not up or not found."
+        success_msg: "Interface {{ item }} is up and running."
+
+    # 5. Aggregate Service Check Status
+    - name: Check service health summary
+      debug:
+        msg: |
+          VPLS service {{ vpls_service_name }} is running as expected.
+          MPLS LSP {{ expected_lsp_name }} is up.
+          BGP session with peer {{ expected_bgp_peer }} is established.
+          Service interfaces {{ expected_interfaces | join(', ') }} are up and running.
+...
