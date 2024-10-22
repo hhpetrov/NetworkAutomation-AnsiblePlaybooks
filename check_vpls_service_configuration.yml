@@ -1,15 +1,13 @@
 ---
 - name: Post-Service Check for VPLS on Juniper ACX/MX Devices
-  hosts: "{{ ansible_host }}"  # Device(s) passed dynamically
+  hosts: "{{ inventory_hostname }}"  # This ensures the specific host passed by AWX is used.
   gather_facts: no
   vars:
     # Default variables, can be overwritten via extra vars in AWX
-    vpls_service_name: "vpls_service"      # Replace with the VPLS service name (can be passed via extra vars)
-    expected_lsp_name: "mpls-lsp-name"     # MPLS LSP name (can be passed via extra vars)
-    expected_bgp_peer: "1.1.1.1"           # BGP peer (can be passed via extra vars)
-    expected_interfaces:                   # Service interfaces (can be passed via extra vars)
-      - "ge-0/0/0"
-      - "ge-0/0/1"
+    vpls_service_name: "{{ lookup('env', 'VPLS_SERVICE_NAME') | default('vpls_service') }}"
+    expected_lsp_name: "{{ lookup('env', 'EXPECTED_LSP_NAME') | default('mpls-lsp-name') }}"
+    expected_bgp_peer: "{{ lookup('env', 'EXPECTED_BGP_PEER') | default('1.1.1.1') }}"
+    expected_interfaces: "{{ lookup('env', 'EXPECTED_INTERFACES') | default(['ge-0/0/0', 'ge-0/0/1']) }}"
 
   tasks:
     # 1. Check MPLS LSPs
