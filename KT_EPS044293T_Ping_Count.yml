@@ -6,8 +6,8 @@
   vars:
     src_ip: "{{ source_ip }}"      # Source IP
     dest_ip: "{{ destination_ip }}"    # Destination IP
-    count: " {{count_number}}"
-    service_name: "{{ routing_instance}} "
+    count: "{{ count_number}} "
+    service_name: "{{ routing_instance }} "
     
   tasks:
     - name: Run ping command
