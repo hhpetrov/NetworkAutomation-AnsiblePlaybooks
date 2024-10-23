@@ -1,0 +1,20 @@
+---
+- name: Ping from source to destination with routing instance KT_EPS044293T
+  hosts: "{{ inventory_hostname }}"
+  gather_facts: no
+  connection: local
+  vars:
+    src_ip: "{{ source_ip }}"      # Source IP
+    dest_ip: "{{ destination_ip }}"    # Destination IP
+    service_name: "{{ routing_instance}} "
+	count: " {{ count_number }} "
+  tasks:
+    - name: Run ping command
+      junipernetworks.junos.junos_command:
+        commands:
+          - "ping routing-instance {{ service_name }} {{ count }} source {{ src_ip }} {{ dest_ip }}"
+      register: ping_output
+
+    - name: Display ping results
+      debug:
+        var: ping_output.stdout_lines
