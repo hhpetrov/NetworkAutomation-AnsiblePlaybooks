@@ -1,0 +1,14 @@
+---
+- name: Run traceroute on Juniper devices
+  hosts: "{{ inventory_hostname }}"
+  gather_facts: no
+  tasks:
+    - name: Execute traceroute to a destination IP
+      junipernetworks.junos.junos_command:
+        commands:
+          - traceroute {{ destination_ip }}
+      register: traceroute_output
+
+    - name: Display traceroute result
+      debug:
+        var: traceroute_output.stdout_lines
