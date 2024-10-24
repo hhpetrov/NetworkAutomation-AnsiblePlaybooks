@@ -16,3 +16,6 @@
     - name: Display traceroute output
       debug:
         var: traceroute_result
+    - name: Display specific traceroute fields
+      debug:
+        msg: "Traceroute to {{ destination_ip }} from {{ source_ip }} via {{ routing_instance }}: {{ traceroute_result.rpc_reply['traceroute-information']['traceroute-route'] }}"
