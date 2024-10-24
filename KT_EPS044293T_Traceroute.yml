@@ -24,11 +24,11 @@
       debug:
         msg: "{{ traceroute_result.output['traceroute-results'][0]['target-ip'][0]['data'] }}"
     
-    - name: Print hop details
+    - name: Print traceroute results
       debug:
         msg: >
-          Hop {{ item['ttl-value'][0]['data'] }}: 
-          IP {{ item['last-ip-address'][0]['data'] }} 
+          {% for item in traceroute_result.output['traceroute-results'][0]['hop'] %}
+          Hop {{ loop.index }}:
+          IP: {{ item['last-ip-address'][0]['data'] }}
           RTT: {{ (item['probe-result'][0]['rtt'][0]['data'] | int) / 1000 }} ms
-      loop: "{{ traceroute_result.output['traceroute-results'][0]['hop'] }}"
-        
+          {% endfor %}
