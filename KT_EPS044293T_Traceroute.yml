@@ -7,17 +7,17 @@
       junipernetworks.junos.junos_rpc:
         rpc: "traceroute"
         args:
-          routing-instance: "{{ routing_instance }}"
-          source: "{{ source_ip }}"
-          host: "{{ destination_ip }}"
+          routing-instance: "{{ service_name }}"  # Updated to use service_name
+          source: "{{ source }}"                   # Updated to use source
+          host: "{{ destination }}"                # Updated to use destination
         output: json
       register: traceroute_result
-    
+
     - name: Print traceroute results
       debug:
         msg: >
           {% for item in traceroute_result.output['traceroute-results'][0]['hop'] %}
-          Hop {{ loop.index }}:
-          IP: {{ item['last-ip-address'][0]['data'] }}
-          RTT: {{ (item['probe-result'][0]['rtt'][0]['data'] | int) / 1000 }} ms
+          Hop {{ loop.index }}:\n
+          IP: {{ item['last-ip-address'][0]['data'] }}\n
+          RTT: {{ (item['probe-result'][0]['rtt'][0]['data'] | int) / 1000 }} ms\n
           {% endfor %}
