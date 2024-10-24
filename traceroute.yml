@@ -1,13 +1,14 @@
 ---
-- name: Run traceroute on Juniper devices
+- name: Run traceroute on a specific Juniper device with extended timeout
   hosts: "{{ inventory_hostname }}"
   gather_facts: no
+  vars:
+    ansible_command_timeout: 120  # Set the timeout for the SSH command to 120 seconds
   tasks:
     - name: Execute traceroute to a destination IP
       junipernetworks.junos.junos_command:
         commands:
           - traceroute {{ destination_ip }}
-        timeout: 120
       register: traceroute_output
 
     - name: Display traceroute result
