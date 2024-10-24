@@ -16,3 +16,18 @@
     - name: Display traceroute output
       debug:
         var: traceroute_result
+    - name: Debug traceroute result
+      debug:
+        var: traceroute_result
+    
+    - name: Get target IP
+      debug:
+        msg: "{{ traceroute_result.output['traceroute-results'][0]['target-ip'][0]['data'] }}"
+    
+    - name: Print hop details
+      debug:
+        msg: |
+          Hop {{ item['ttl-value'][0]['data'] }}: IP {{ item['last-ip-address'][0]['data'] }} 
+          RTT: {{ item['probe-result'][0]['rtt'][0]['data'] }}
+      loop: "{{ traceroute_result.output['traceroute-results'][0]['hop'] }}"
+    
