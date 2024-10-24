@@ -8,7 +8,7 @@
     - name: Execute traceroute to a destination IP
       junipernetworks.junos.junos_command:
         commands:
-          - traceroute {{ destination_ip }} wait 1
+          - traceroute {{ destination_ip }} wait 1 ttl 20
       register: traceroute_output
 
     - name: Display traceroute result
