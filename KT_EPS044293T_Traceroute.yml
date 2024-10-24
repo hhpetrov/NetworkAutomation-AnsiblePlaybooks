@@ -13,23 +13,6 @@
         output: json
       register: traceroute_result
 
-
-    - name: Extract relevant data
-      set_fact:
-        traceroute_data: "{{ traceroute_result.output.traceroute-results[0] }}"
-
-    - name: Display the traceroute output
+    - name: Display traceroute output
       debug:
-        msg:
-          - "Target Host: {{ traceroute_data['target-host'][0]['data'] }}"
-          - "Source: {{ traceroute_data['source'][0]['data'] }}"
-          - "Max Hop Index: {{ traceroute_data['max-hop-index'][0]['data'] }}"
-          - "Packet Size: {{ traceroute_data['packet-size'][0]['data'] }}"
-
-    - name: Extract hop information
-      set_fact:
-        hops: "{{ traceroute_data.hop | map(attribute='last-ip-address') | map(attribute='0.data') | list }}"
-
-    - name: Display hop information
-      debug:
-        msg: "Hops: {{ hops }}"
+        var: traceroute_result
