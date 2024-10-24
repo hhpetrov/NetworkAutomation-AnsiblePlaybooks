@@ -8,7 +8,7 @@
     dest_ip: "{{ destination_ip }}"    # Destination IP
     count: "{{ count_number }}"       # Count number
     service_name: "{{ routing_instance }}"
-    packet_size: "{{ size }}"
+    size: "{{ packet_size }}"
   
   tasks:
     - name: Run ping command
