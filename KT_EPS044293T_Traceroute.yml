@@ -13,9 +13,23 @@
         output: json
       register: traceroute_result
 
-    - name: Display traceroute output
+
+    - name: Extract relevant data
+      set_fact:
+        traceroute_data: "{{ traceroute_result.output.traceroute-results[0] }}"
+
+    - name: Display the traceroute output
       debug:
-        var: traceroute_result
-    - name: Display specific traceroute fields
+        msg:
+          - "Target Host: {{ traceroute_data['target-host'][0]['data'] }}"
+          - "Source: {{ traceroute_data['source'][0]['data'] }}"
+          - "Max Hop Index: {{ traceroute_data['max-hop-index'][0]['data'] }}"
+          - "Packet Size: {{ traceroute_data['packet-size'][0]['data'] }}"
+
+    - name: Extract hop information
+      set_fact:
+        hops: "{{ traceroute_data.hop | map(attribute='last-ip-address') | map(attribute='0.data') | list }}"
+
+    - name: Display hop information
       debug:
-        msg: "Traceroute to {{ destination_ip }} from {{ source_ip }} via {{ routing_instance }}: {{ traceroute_result.rpc_reply['traceroute-information']['traceroute-route'] }}"
+        msg: "Hops: {{ hops }}"
