@@ -12,17 +12,6 @@
           host: "{{ destination_ip }}"
         output: json
       register: traceroute_result
-
-    - name: Display traceroute output
-      debug:
-        var: traceroute_result
-    - name: Debug traceroute result
-      debug:
-        var: traceroute_result
-    
-    - name: Get target IP
-      debug:
-        msg: "{{ traceroute_result.output['traceroute-results'][0]['target-ip'][0]['data'] }}"
     
     - name: Print traceroute results
       debug:
